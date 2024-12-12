@@ -28,7 +28,7 @@ async def handle_forwarded_message(client, message):
     # Check if the message is forwarded from @BotFather
     if message.forward_from and message.forward_from.username == "BotFather":
         # Try to extract the bot token from the forwarded message
-        bot_token = extract_token_from_message(message.text, message.entities)
+        bot_token = extract_token_from_message(message.text)
         
         if bot_token:
             # If bot token is found, proceed with cloning
@@ -38,59 +38,29 @@ async def handle_forwarded_message(client, message):
     else:
         await message.reply_text("**Please forward the message from @BotFather with the bot token.**")
 
-def extract_token_from_message(message_text, entities):
+def extract_token_from_message(message_text):
     """
     Function to extract the bot token from the forwarded message.
-    It checks both plain text and Telegram entities (e.g., code block).
+    Looks for the phrase "Use this token to access the HTTP API:" and extracts the token.
     """
     try:
-        # Debugging: Print message content and entities
+        # Debugging: print the message text to help analyze the structure
         print(f"Message Text: {message_text}")
-        print(f"Entities: {entities}")
 
-        # Try extracting token from plain text using regex (without backticks)
-        token = extract_token_from_plain_text(message_text)
-        if token:
-            return token
-
-        # If no token found in plain text, check for code blocks
-        if entities:
-            for entity in entities:
-                if entity.type == "code":
-                    # Extract token from code block
-                    token = message_text[entity.offset:entity.offset + entity.length]
-                    print(f"Token found in code block: {token}")
-                    
-                    # Validate token format
-                    if validate_token_format(token):
-                        return token
+        # Search for the phrase "Use this token to access the HTTP API:" and capture the token that follows it
+        pattern = r"Use this token to access the HTTP API:\s*([0-9]{9}:[A-Za-z0-9_-]{35})"
+        match = re.search(pattern, message_text)
         
-        # If no token found, return None
-        return None
+        if match:
+            token = match.group(1)  # Extract the token from the match
+            print(f"Token found: {token}")  # Debugging line to print extracted token
+            return token
+        else:
+            return None
 
     except Exception as e:
         print(f"Error while extracting token: {e}")
         return None
-
-def extract_token_from_plain_text(message_text):
-    """
-    Extract the bot token from plain text using regex.
-    """
-    # Regular expression to match bot token format
-    pattern = r"([0-9]{9}:[A-Za-z0-9_-]{35})"
-    match = re.search(pattern, message_text)
-    
-    if match:
-        print(f"Token found in plain text: {match.group(1)}")
-        return match.group(1)  # Return the matched bot token
-    return None
-
-def validate_token_format(token):
-    """
-    Validate if the extracted token matches the bot token format.
-    """
-    # Token format: 9 digits followed by a colon and 35 alphanumeric characters
-    return bool(re.match(r"^[0-9]{9}:[A-Za-z0-9_-]{35}$", token))
         
 async def clone_bot(message, bot_token):
     # Send a reply indicating bot token is being processed
