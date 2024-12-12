@@ -8,7 +8,7 @@ START_BOT = [
     [
         InlineKeyboardButton(
             text="😍 ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ 😍",
-            url=f"https://t.me/{nexichat.username}?startgroup=true",
+            url=f"https://t.me/Goodbyenjbot?startgroup=true",
         ),
     ],
     [
