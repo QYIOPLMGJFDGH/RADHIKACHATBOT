@@ -47,7 +47,7 @@ async def anony_boot():
     except Exception as ex:
         LOGGER.error(f"Failed to set bot commands: {ex}")
 
-    LOGGER.info(f"@{nexichat.username} Started.")
+    LOGGER.info("radhika Started.")
     try:
         await nexichat.send_message(int(OWNER_ID), f"{nexichat.mention} has started")
     except Exception as ex:
