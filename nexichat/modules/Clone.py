@@ -44,32 +44,53 @@ def extract_token_from_message(message_text, entities):
     It checks both plain text and Telegram entities (e.g., code block).
     """
     try:
-        # First, check if the message contains any code blocks (entities type "code")
-        for entity in entities:
-            if entity.type == "code":
-                token = message_text[entity.offset:entity.offset + entity.length]
-                print(f"Token found in code block: {token}")  # Debugging line to print extracted token
-                
-                # Check if the extracted token matches the standard bot token format
-                if re.match(r"^[0-9]{9}:[A-Za-z0-9_-]{35}$", token):
-                    return token
+        # Debugging: Print message content and entities
+        print(f"Message Text: {message_text}")
+        print(f"Entities: {entities}")
+
+        # Try extracting token from plain text using regex (without backticks)
+        token = extract_token_from_plain_text(message_text)
+        if token:
+            return token
+
+        # If no token found in plain text, check for code blocks
+        if entities:
+            for entity in entities:
+                if entity.type == "code":
+                    # Extract token from code block
+                    token = message_text[entity.offset:entity.offset + entity.length]
+                    print(f"Token found in code block: {token}")
+                    
+                    # Validate token format
+                    if validate_token_format(token):
+                        return token
         
-        # If no token found in code block, check plain text for token
-        message_text = message_text.strip()
-        
-        # Match the bot token in plain text, typically between backticks
-        pattern = r"`([0-9]{9}:[A-Za-z0-9_-]{35})`"
-        match = re.search(pattern, message_text)
-        
-        if match:
-            print(f"Token found in text: {match.group(1)}")  # Debugging line to print extracted token
-            return match.group(1)  # Return the matched bot token (without backticks)
-        
+        # If no token found, return None
         return None
 
     except Exception as e:
         print(f"Error while extracting token: {e}")
         return None
+
+def extract_token_from_plain_text(message_text):
+    """
+    Extract the bot token from plain text using regex.
+    """
+    # Regular expression to match bot token format
+    pattern = r"([0-9]{9}:[A-Za-z0-9_-]{35})"
+    match = re.search(pattern, message_text)
+    
+    if match:
+        print(f"Token found in plain text: {match.group(1)}")
+        return match.group(1)  # Return the matched bot token
+    return None
+
+def validate_token_format(token):
+    """
+    Validate if the extracted token matches the bot token format.
+    """
+    # Token format: 9 digits followed by a colon and 35 alphanumeric characters
+    return bool(re.match(r"^[0-9]{9}:[A-Za-z0-9_-]{35}$", token))
         
 async def clone_bot(message, bot_token):
     # Send a reply indicating bot token is being processed
