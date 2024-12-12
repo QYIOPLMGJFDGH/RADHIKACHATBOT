@@ -17,56 +17,79 @@ clonebotdb = mongodb.clonebotdb
 async def save_clonebot_owner(bot_id, user_id):
     await cloneownerdb.insert_one({"bot_id": bot_id, "user_id": user_id})
 
-@app.on_message(filters.command(["clone", "host", "deploy"]))
-async def clone_txt(client, message):
-    if len(message.command) > 1:
-        bot_token = message.text.split("/clone", 1)[1].strip()
-        mi = await message.reply_text("Please wait while I check the bot token.")
-        try:
-            ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root="nexichat/mplugin"))
-            await ai.start()
-            bot = await ai.get_me()
-            bot_id = bot.id
-            user_id = message.from_user.id
-            CLONE_OWNERS[bot_id] = user_id
-        except (AccessTokenExpired, AccessTokenInvalid):
-            await mi.edit_text("**Invalid bot token. Please provide a valid one.**")
-            return
-        except Exception as e:
-            cloned_bot = await clonebotdb.find_one({"token": bot_token})
-            if cloned_bot:
-                await mi.edit_text("**🤖 Your bot is already cloned ✅**")
-                return
+@app.on_message(filters.command("clone"))
+async def handle_clone_command(client, message):
+    # जब यूज़र /clone कमांड भेजे तो उसे गाइड किया जाए
+    await message.reply_text("**कृपया @BotFather से बोट टोकन फॉरवर्ड करें।**\n\n(आपको बोट टोकन प्राप्त करने के लिए @BotFather से संदेश फॉरवर्ड करना होगा)")
 
-        await mi.edit_text("**Cloning process started. Please wait for the bot to start.**")
-        try:
-            details = {
-                "bot_id": bot.id,
-                "is_bot": True,
-                "user_id": user_id,
-                "name": bot.first_name,
-                "token": bot_token,
-                "username": bot.username,
-            }
-
-            await app.send_message(
-                int(OWNER_ID), f"**#New_Clone**\n\n**Bot:- @{bot.username}**\n\n**Details:-**\n{details}"
-            )
-
-            await clonebotdb.insert_one(details)
-            await save_clonebot_owner(bot.id, user_id)
-            CLONES.add(bot.id)
-
-            await mi.edit_text(
-                f"**Bot @{bot.username} has been successfully cloned and started ✅.**\n**Remove clone by :- /delclone**\n**Check all cloned bot list by:- /cloned**"
-            )
-        except BaseException as e:
-            logging.exception("Error while cloning bot.")
-            await mi.edit_text(
-                f"⚠️ <b>Error:</b>\n\n<code>{e}</code>\n\n**Forward this message to @THE_VIP_BOY_OP for assistance**"
-            )
+@app.on_message(filters.forwarded)
+async def handle_forwarded_message(client, message):
+    # Check if the message is forwarded from @BotFather
+    if message.forward_from and message.forward_from.username == "BotFather":
+        # Try to extract the bot token from the forwarded message
+        bot_token = extract_token_from_message(message.text)
+        
+        if bot_token:
+            # If bot token is found, proceed with cloning
+            await clone_bot(message, bot_token)
+        else:
+            await message.reply_text("**Unable to extract bot token from the forwarded message.**")
     else:
-        await message.reply_text("**Provide Bot Token after /clone Command from @Botfather.**")
+        await message.reply_text("**Please forward the message from @BotFather with the bot token.**")
+
+def extract_token_from_message(message_text):
+    # Regular expression to match a bot token format
+    pattern = r"([0-9]{9}:[A-Za-z0-9_-]{35})"
+    match = re.search(pattern, message_text)
+    
+    if match:
+        return match.group(0)  # Return the matched bot token
+    return None
+
+async def clone_bot(message, bot_token):
+    # Send a reply indicating bot token is being processed
+    mi = await message.reply_text("Please wait while I check the bot token.")
+    
+    try:
+        ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root="nexichat/mplugin"))
+        await ai.start()
+        bot = await ai.get_me()
+        bot_id = bot.id
+        user_id = message.from_user.id
+        CLONE_OWNERS[bot_id] = user_id
+
+        # Insert bot details into the database
+        details = {
+            "bot_id": bot.id,
+            "is_bot": True,
+            "user_id": user_id,
+            "name": bot.first_name,
+            "token": bot_token,
+            "username": bot.username,
+        }
+
+        # Send details to the owner
+        await app.send_message(
+            int(OWNER_ID), f"**#New_Clone**\n\n**Bot:- @{bot.username}**\n\n**Details:-**\n{details}"
+        )
+
+        await clonebotdb.insert_one(details)
+        await save_clonebot_owner(bot.id, user_id)
+        CLONES.add(bot.id)
+
+        await mi.edit_text(
+            f"**Bot @{bot.username} has been successfully cloned and started ✅.**\n**Remove clone by :- /delclone**\n**Check all cloned bot list by:- /cloned**"
+        )
+
+    except (AccessTokenExpired, AccessTokenInvalid):
+        await mi.edit_text("**Invalid bot token. Please provide a valid one.**")
+    except Exception as e:
+        logging.exception("Error while cloning bot.")
+        await mi.edit_text(
+            f"⚠️ <b>Error:</b>\n\n<code>{e}</code>\n\n**Forward this message to @THE_VIP_BOY_OP for assistance**"
+        )
+
+
 
 
 @app.on_message(filters.command("cloned"))
