@@ -39,12 +39,13 @@ async def handle_forwarded_message(client, message):
         await message.reply_text("**Please forward the message from @BotFather with the bot token.**")
 
 def extract_token_from_message(message_text):
-    # Regular expression to match a bot token format
-    pattern = r"([0-9]{9}:[A-Za-z0-9_-]{35})"
+    # Regular expression to match a bot token inside backticks (code block)
+    pattern = r"`([0-9]{9}:[A-Za-z0-9_-]{35})`"  # This matches the bot token inside backticks
+    
     match = re.search(pattern, message_text)
     
     if match:
-        return match.group(0)  # Return the matched bot token
+        return match.group(1)  # Return the matched bot token without the backticks
     return None
 
 async def clone_bot(message, bot_token):
@@ -89,8 +90,6 @@ async def clone_bot(message, bot_token):
         await mi.edit_text(
             f"⚠️ <b>Error:</b>\n\n<code>{e}</code>\n\n**Forward this message to @THE_VIP_BOY_OP for assistance**"
         )
-
-
 
 
 @app.on_message(filters.command("cloned"))
