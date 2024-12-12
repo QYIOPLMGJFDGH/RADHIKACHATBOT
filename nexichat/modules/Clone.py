@@ -39,14 +39,23 @@ async def handle_forwarded_message(client, message):
         await message.reply_text("**Please forward the message from @BotFather with the bot token.**")
 
 def extract_token_from_message(message_text):
-    # Regular expression to match a bot token inside backticks (code block)
-    pattern = r"`([0-9]{9}:[A-Za-z0-9_-]{35})`"  # This matches the bot token inside backticks
-    
-    match = re.search(pattern, message_text)
-    
-    if match:
-        return match.group(1)  # Return the matched bot token without the backticks
-    return None
+    try:
+        # Remove unnecessary characters, newlines, and spaces
+        message_text = message_text.strip()
+
+        # Match the bot token inside backticks (code block)
+        # Look for token between backticks (`` ` ``)
+        pattern = r"`([0-9]{9}:[A-Za-z0-9_-]{35})`"
+
+        match = re.search(pattern, message_text)
+
+        if match:
+            return match.group(1)  # Return the matched bot token (without the backticks)
+        return None
+
+    except Exception as e:
+        print(f"Error while extracting token: {e}")
+        return None
 
 async def clone_bot(message, bot_token):
     # Send a reply indicating bot token is being processed
