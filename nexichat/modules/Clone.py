@@ -28,7 +28,7 @@ async def handle_forwarded_message(client, message):
     # Check if the message is forwarded from @BotFather
     if message.forward_from and message.forward_from.username == "BotFather":
         # Try to extract the bot token from the forwarded message
-        bot_token = extract_token_from_message(message.text)
+        bot_token = extract_token_from_message(message.text, message.entities)
         
         if bot_token:
             # If bot token is found, proceed with cloning
@@ -38,25 +38,39 @@ async def handle_forwarded_message(client, message):
     else:
         await message.reply_text("**Please forward the message from @BotFather with the bot token.**")
 
-def extract_token_from_message(message_text):
+def extract_token_from_message(message_text, entities):
+    """
+    Function to extract the bot token from the forwarded message.
+    It checks both plain text and Telegram entities (e.g., code block).
+    """
     try:
-        # Remove unnecessary characters, newlines, and spaces
+        # First, check if the message contains any code blocks (entities type "code")
+        for entity in entities:
+            if entity.type == "code":
+                token = message_text[entity.offset:entity.offset + entity.length]
+                print(f"Token found in code block: {token}")  # Debugging line to print extracted token
+                
+                # Check if the extracted token matches the standard bot token format
+                if re.match(r"^[0-9]{9}:[A-Za-z0-9_-]{35}$", token):
+                    return token
+        
+        # If no token found in code block, check plain text for token
         message_text = message_text.strip()
-
-        # Match the bot token inside backticks (code block)
-        # Look for token between backticks (`` ` ``)
+        
+        # Match the bot token in plain text, typically between backticks
         pattern = r"`([0-9]{9}:[A-Za-z0-9_-]{35})`"
-
         match = re.search(pattern, message_text)
-
+        
         if match:
-            return match.group(1)  # Return the matched bot token (without the backticks)
+            print(f"Token found in text: {match.group(1)}")  # Debugging line to print extracted token
+            return match.group(1)  # Return the matched bot token (without backticks)
+        
         return None
 
     except Exception as e:
         print(f"Error while extracting token: {e}")
         return None
-
+        
 async def clone_bot(message, bot_token):
     # Send a reply indicating bot token is being processed
     mi = await message.reply_text("Please wait while I check the bot token.")
