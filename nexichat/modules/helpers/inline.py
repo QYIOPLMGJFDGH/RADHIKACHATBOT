@@ -8,7 +8,7 @@ START_BOT = [
     [
         InlineKeyboardButton(
             text="😍 ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ 😍",
-            url=f"https://t.me/Goodbyenjbot?startgroup=true",
+            url="https://t.me/Goodbyenjbot?startgroup=true",
         ),
     ],
     [
@@ -29,7 +29,7 @@ DEV_OP = [
     [
         InlineKeyboardButton(
             text="✦ ᴀᴅᴅ ᴍᴇ ʙᴀʙʏ ✦",
-            url=f"https://t.me/{nexichat.username}?startgroup=true",
+            url="https://t.me/Goodbyenjbot?startgroup=true",
         ),
     ],
     [
@@ -45,7 +45,7 @@ PNG_BTN = [
     [
         InlineKeyboardButton(
             text="😍 ᴀᴅᴅ ᴍᴇ ʙᴀʙʏ 😍",
-            url=f"https://t.me/{nexichat.username}?startgroup=true",
+            url="https://t.me/Goodbyenjbot?startgroup=true",
         ),
     ],
     [
@@ -123,7 +123,7 @@ HELP_START = [
 HELP_BUTN = [
     [
         InlineKeyboardButton(
-            text="« ʜᴇʟᴘ »", url=f"https://t.me/{nexichat.username}?start=help"
+            text="« ʜᴇʟᴘ »", url="https://t.me/Goodbyenjbot?start=help"
         ),
         InlineKeyboardButton(text="⦿ ᴄʟᴏsᴇ ⦿", callback_data="CLOSE"),
     ],
