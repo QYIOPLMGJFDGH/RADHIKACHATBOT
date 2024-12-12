@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import asyncio
 from pyrogram.enums import ParseMode
 from pyrogram import Client, filters
@@ -24,7 +23,7 @@ async def clone_txt(client, message):
         bot_token = message.text.split("/clone", 1)[1].strip()
         mi = await message.reply_text("Please wait while I check the bot token.")
         try:
-            ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root="RADHIKA/mplugin"))
+            ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root="nexichat/mplugin"))
             await ai.start()
             bot = await ai.get_me()
             bot_id = bot.id
@@ -68,7 +67,6 @@ async def clone_txt(client, message):
             )
     else:
         await message.reply_text("**Provide Bot Token after /clone Command from @Botfather.**")
-
 
 
 @app.on_message(filters.command("cloned"))
