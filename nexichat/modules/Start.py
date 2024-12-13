@@ -383,7 +383,7 @@ async def broadcast_message(client, message):
     async with broadcast_lock:
         if IS_BROADCASTING:
             return await message.reply_text(
-                "A broadcast is already in progress. Please wait for it to complete."
+                "❍ Bʀᴏᴀᴅᴄᴀsᴛ ᴘʀᴏᴄᴇssɪɴɢ ᴡᴀɪᴛ ғᴏʀ ᴄᴏᴍᴘʟᴇᴛᴇ."
             )
 
         IS_BROADCASTING = True
@@ -408,7 +408,7 @@ async def broadcast_message(client, message):
             else:
                 if len(message.command) < 2:
                     return await message.reply_text(
-                        "**Please provide text after the command or reply to a message for broadcasting.**"
+                        "**❍ ᴇxᴀᴍᴘʟᴇ :**\n\n❍ /broadcast [ᴍᴇssᴀɢᴇ ᴏʀ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ]"
                     )
                 
                 flags = {
@@ -423,7 +423,7 @@ async def broadcast_message(client, message):
 
                 if not query:
                     return await message.reply_text(
-                        "Please provide a valid text message or a flag: -pin, -nogroup, -pinloud, -user"
+                        "❍ Pʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ᴛᴇxᴛ ᴍᴇssᴀɢᴇ ᴏʀ ᴀ ғʟᴀɢ: -pin, -nogroup, -pinloud, -user"
                     )
 
                 
@@ -431,7 +431,7 @@ async def broadcast_message(client, message):
                 broadcast_type = "text"
             
 
-            await message.reply_text("**Started broadcasting...**")
+            await message.reply_text("**➥ Bʀᴏᴀᴅᴄᴀsᴛ ʀᴜɴɪɴɢ...**")
 
             if not flags.get("-nogroup", False):
                 sent = 0
@@ -478,7 +478,7 @@ async def broadcast_message(client, message):
                         continue
 
                 await message.reply_text(
-                    f"**Broadcasted to {sent} chats and pinned in {pin_count} chats.**"
+                    f"**➬ Bʀᴏᴀᴅᴄᴀsᴛ ᴛᴏ {sent} ᴄʜᴀᴛs ᴀɴᴅ ᴘɪɴɴᴇᴅ ɪɴ {pin_count} ᴄʜᴀᴛs.**"
                 )
 
             if flags.get("-user", False):
@@ -513,7 +513,7 @@ async def broadcast_message(client, message):
                         
                         continue
 
-                await message.reply_text(f"**Broadcasted to {susr} users.**")
+                await message.reply_text(f"**➬ Bʀᴏᴀᴅᴄᴀsᴛ ᴛᴏ {susr} ᴜsᴇʀ.**")
 
         finally:
             IS_BROADCASTING = False
