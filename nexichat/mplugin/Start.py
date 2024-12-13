@@ -30,27 +30,7 @@ from nexichat.mplugin.helpers import (
 )
 
 GSTART = """**ʜᴇʏ ᴅᴇᴀʀ {}**\n\n**ᴛʜᴀɴᴋs ғᴏʀ sᴛᴀʀᴛ ᴍᴇ ɪɴ ɢʀᴏᴜᴘ ʏᴏᴜ ᴄᴀɴ ᴄʜᴀɴɢᴇ ʟᴀɴɢᴜᴀɢᴇ ʙʏ ᴄʟɪᴄᴋ ᴏɴ ɢɪᴠᴇɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴs.**\n**ᴄʟɪᴄᴋ ᴀɴᴅ sᴇʟᴇᴄᴛ ʏᴏᴜʀ ғᴀᴠᴏᴜʀɪᴛᴇ ʟᴀɴɢᴜᴀɢᴇ ᴛᴏ sᴇᴛ ᴄʜᴀᴛ ʟᴀɴɢᴜᴀɢᴇ ғᴏʀ ʙᴏᴛ ʀᴇᴘʟʏ.**\n\n**ᴛʜᴀɴᴋ ʏᴏᴜ ᴘʟᴇᴀsᴇ ᴇɴɪᴏʏ.**"""
-
-
 BOT = "https://files.catbox.moe/hwqq2e.jpg"
-IMG = [
-    "https://graph.org/file/210751796ff48991b86a3.jpg",
-    "https://graph.org/file/7b4924be4179f70abcf33.jpg",
-    "https://graph.org/file/f6d8e64246bddc26b4f66.jpg",
-    "https://graph.org/file/63d3ec1ca2c965d6ef210.jpg",
-    "https://graph.org/file/9f12dc2a668d40875deb5.jpg",
-    "https://graph.org/file/0f89cd8d55fd9bb5130e1.jpg",
-    "https://graph.org/file/e5eb7673737ada9679b47.jpg",
-    "https://graph.org/file/2e4dfe1fa5185c7ff1bfd.jpg",
-    "https://graph.org/file/36af423228372b8899f20.jpg",
-    "https://graph.org/file/c698fa9b221772c2a4f3a.jpg",
-    "https://graph.org/file/61b08f41855afd9bed0ab.jpg",
-    "https://graph.org/file/744b1a83aac76cb3779eb.jpg",
-    "https://graph.org/file/814cd9a25dd78480d0ce1.jpg",
-    "https://graph.org/file/e8b472bcfa6680f6c6a5d.jpg",
-]
-
-
 
 from nexichat import db
 
@@ -96,7 +76,7 @@ async def welcomejej(client, message: Message):
             if member.id == (await client.get_me()).id:
                 try:
                     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("sᴇʟᴇᴄᴛ ʟᴀɴɢᴜᴀɢᴇ", callback_data="choose_lang")]])    
-                    await message.reply_photo(photo=random.choice(IMG), caption=START.format(users, chats), reply_markup=reply_markup)
+                    await message.reply_text(text=START.format(users, chats), reply_markup=reply_markup)
                 except Exception as e:
                     print(f"{e}")
                     pass
@@ -121,7 +101,7 @@ async def welcomejej(client, message: Message):
                 count = await client.get_chat_members_count(chat.id)
                 username = chat.username if chat.username else "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏᴜᴘ"
                 msg = (
-                    f"**📝𝐌ᴜsɪᴄ 𝐁ᴏᴛ 𝐀ᴅᴅᴇᴅ 𝐈ɴ 𝐀 #𝐍ᴇᴡ_𝐆ʀᴏᴜᴘ**\n\n"
+                    f"**📝𝐁ᴏᴛ 𝐀ᴅᴅᴇᴅ 𝐈ɴ 𝐀 #𝐍ᴇᴡ_𝐆ʀᴏᴜᴘ**\n\n"
                     f"**📌𝐂ʜᴀᴛ 𝐍ᴀᴍᴇ:** {chat.title}\n"
                     f"**🍂𝐂ʜᴀᴛ 𝐈ᴅ:** `{chat.id}`\n"
                     f"**🔐𝐂ʜᴀᴛ 𝐔sᴇʀɴᴀᴍᴇ:** @{username}\n"
@@ -136,10 +116,9 @@ async def welcomejej(client, message: Message):
                     owner_id = CLONE_OWNERS.get(bot_id)
                     
                     if owner_id:
-                        await client.send_photo(
+                        await client.send_text(
                             int(owner_id),
-                            photo=chat_photo,
-                            caption=msg,
+                            text=msg,
                             reply_markup=InlineKeyboardMarkup(
                                 [[InlineKeyboardButton(f"{message.from_user.first_name}", user_id=message.from_user.id)]]
                             )
@@ -148,6 +127,7 @@ async def welcomejej(client, message: Message):
                     print(f"Err: {e}")
     except Exception as e:
         print(f"Err: {e}")
+
 
 
 from pathlib import Path
@@ -290,18 +270,16 @@ async def start(client: Client, m: Message):
         bot_id = client.me.id
         owner_id = CLONE_OWNERS.get(bot_id)
         if owner_id:
-            await client.send_photo(
+            await client.send_text(
                 int(owner_id),
-                photo=chat_photo,
                 caption=f"{m.from_user.mention} ʜᴀs sᴛᴀʀᴛᴇᴅ ʙᴏᴛ. \n\n**ɴᴀᴍᴇ :** {m.chat.first_name}\n**ᴜsᴇʀɴᴀᴍᴇ :** @{m.chat.username}\n**ɪᴅ :** {m.chat.id}\n\n**ᴛᴏᴛᴀʟ ᴜsᴇʀs :** {users}",
                 reply_markup=keyboard
             )
         
     else:
         # Handle the case for groups/chats other than private chats
-        await m.reply_photo(
-            photo=random.choice(IMG),
-            caption=GSTART.format(m.from_user.mention or "can't mention"),
+        await m.reply_text(
+            text=GSTART.format(m.from_user.mention or "can't mention"),
             reply_markup=InlineKeyboardMarkup(HELP_START),
         )
         await add_served_chat(m.chat.id)
@@ -312,14 +290,13 @@ async def start(client: Client, m: Message):
 async def ping(client: Client, message: Message):
     start = datetime.now()
     UP, CPU, RAM, DISK = await bot_sys_stats()
-    loda = await message.reply_photo(
-        photo=random.choice(IMG),
-        caption="ᴘɪɴɢɪɴɢ...",
+    loda = await message.reply_text(
+        text="ᴘɪɴɢɪɴɢ...",
     )
 
     ms = (datetime.now() - start).microseconds / 1000
     await loda.edit_text(
-        text=f"нey вαву!!\n{(await client.get_me()).mention} ᴄʜᴀᴛʙᴏᴛ ιѕ alιve 🥀 αnd worĸιng ғιne wιтн a pιng oғ\n\n**➥** `{ms}` ms\n**➲ ᴄᴘᴜ:** {CPU}\n**➲ ʀᴀᴍ:** {RAM}\n**➲ ᴅɪsᴋ:** {DISK}\n**➲ ᴜᴘᴛɪᴍᴇ »** {UP}\n\n<b>||**๏ мαdє ωιтн ❣️ ву [ᴠɪᴘ ʙᴏʏ](https://t.me/{OWNER_USERNAME}) **||</b>",
+        text=f"**➥** `{ms}` ms\n**➲ ᴄᴘᴜ:** {CPU}\n**➲ ʀᴀᴍ:** {RAM}\n**➲ ᴅɪsᴋ:** {DISK}\n**➲ ᴜᴘᴛɪᴍᴇ »** {UP}\n\n<b>||**♡ Dᴇᴠᴇʟᴏᴘᴇʀ ˹ ʙᴀʙʏ-ᴍᴜsɪᴄ ™˼𓅂**||</b>",
         reply_markup=InlineKeyboardMarkup(PNG_BTN),
     )
     if message.chat.type == ChatType.PRIVATE:
@@ -333,10 +310,10 @@ async def stats(cli: Client, message: Message):
     users = len(await get_served_users())
     chats = len(await get_served_chats())
     await message.reply_text(
-        f"""{(await cli.get_me()).mention} ᴄʜᴀᴛʙᴏᴛ sᴛᴀᴛs:
-
-➻ **ᴄʜᴀᴛs :** {chats}
-➻ **ᴜsᴇʀs :** {users}"""
+        f"""```
+{(await cli.get_me()).mention} ᴄʜᴀᴛʙᴏᴛ sᴛᴀᴛs:```
+➥ **ᴄʜᴀᴛs :** {chats}
+➥ **ᴜsᴇʀs :** {users}"""
     )
 
 
@@ -361,7 +338,7 @@ async def broadcast_message(client, message):
     async with broadcast_lock:
         if IS_BROADCASTING:
             return await message.reply_text(
-                "A broadcast is already in progress. Please wait for it to complete."
+                "❍ Bʀᴏᴀᴅᴄᴀsᴛ ᴘʀᴏᴄᴇssɪɴɢ ᴡᴀɪᴛ ғᴏʀ ᴄᴏᴍᴘʟᴇᴛᴇ."
             )
 
         IS_BROADCASTING = True
@@ -401,7 +378,7 @@ async def broadcast_message(client, message):
 
                 if not query:
                     return await message.reply_text(
-                        "Please provide a valid text message or a flag: -pin, -nogroup, -pinloud, -user"
+                        "**❍ ᴇxᴀᴍᴘʟᴇ :**\n\n❍ /broadcast [ᴍᴇssᴀɢᴇ ᴏʀ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ]"
                     )
 
                 
@@ -409,7 +386,7 @@ async def broadcast_message(client, message):
                 broadcast_type = "text"
             
 
-            await message.reply_text("**Started broadcasting...**")
+            await message.reply_text("**➥ Bʀᴏᴀᴅᴄᴀsᴛ ʀᴜɴɪɴɢ...**")
 
             if not flags.get("-nogroup", False):
                 sent = 0
@@ -456,7 +433,7 @@ async def broadcast_message(client, message):
                         continue
 
                 await message.reply_text(
-                    f"**Broadcasted to {sent} chats and pinned in {pin_count} chats.**"
+                    f"**➬ Bʀᴏᴀᴅᴄᴀsᴛ ᴛᴏ {sent} ᴄʜᴀᴛs ᴀɴᴅ ᴘɪɴɴᴇᴅ ɪɴ {pin_count} ᴄʜᴀᴛs.**"
                 )
 
             if flags.get("-user", False):
@@ -491,7 +468,7 @@ async def broadcast_message(client, message):
                         
                         continue
 
-                await message.reply_text(f"**Broadcasted to {susr} users.**")
+                await message.reply_text(f"**➬ Bʀᴏᴀᴅᴄᴀsᴛ ᴛᴏ {susr} ᴜsᴇʀ.**")
 
         finally:
             IS_BROADCASTING = False
