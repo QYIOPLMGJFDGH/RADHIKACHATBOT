@@ -321,29 +321,18 @@ async def start(_, m: Message):
 @nexichat.on_cmd("help")
 async def help(client: nexichat, m: Message):
     if m.chat.type == ChatType.PRIVATE:
-        hmm = await m.reply_photo(
-            photo=random.choice(IMG),
-            caption=HELP_READ,
+        hmm = await m.reply_text(
+            text=HELP_READ,
             reply_markup=InlineKeyboardMarkup(HELP_BTN),
         )
 
     else:
         await m.reply_photo(
             photo=random.choice(IMG),
-            caption="**ʜᴇʏ, ᴘᴍ ᴍᴇ ғᴏʀ ʜᴇʟᴘ ᴄᴏᴍᴍᴀɴᴅs!**",
+            caption="**__Hᴇʏ, ᴘᴍ ᴍᴇ ғᴏʀ ʜᴇʟᴘ ᴄᴏᴍᴍᴀɴᴅs__!**",
             reply_markup=InlineKeyboardMarkup(HELP_BUTN),
         )
         await add_served_chat(m.chat.id)
-
-
-@nexichat.on_cmd("repo")
-async def repo(_, m: Message):
-    await m.reply_text(
-        text=SOURCE_READ,
-        reply_markup=InlineKeyboardMarkup(CLOSE_BTN),
-        disable_web_page_preview=True,
-    )
-
 
 
 
