@@ -13,7 +13,6 @@ from config import MONGO_URL
 from nexichat import nexichat, mongo, LOGGER, db
 from nexichat.modules.helpers import chatai, storeai, languages, CHATBOT_ON
 from nexichat.modules.helpers import (
-    ABOUT_BTN,
     ADMIN_READ,
     BACK,
     CHATBOT_BACK,
