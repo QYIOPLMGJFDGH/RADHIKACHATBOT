@@ -1,4 +1,8 @@
 import random
+import psutil
+import time
+from nexichat import _boot_
+from nexichat import get_readable_time
 from pymongo import MongoClient
 from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
@@ -35,10 +39,38 @@ from nexichat.mplugin.helpers import (
 lang_db = db.ChatLangDb.LangCollection
 status_db = db.chatbot_status_db.status
 
+async def bot_sys_stats():
+    bot_uptime = int(time.time() - _boot_)
+    cpu = psutil.cpu_percent(interval=0.5)
+    mem = psutil.virtual_memory().percent
+    disk = psutil.disk_usage("/").percent
+    UP = f"{get_readable_time((bot_uptime))}"
+    CPU = f"{cpu}%"
+    RAM = f"{mem}%"
+    DISK = f"{disk}%"
+    return UP, CPU, RAM, DISK
+
+# Fetch dynamic START_TEXT
+async def fetch_data():
+    users = len(await get_served_users())
+    chats = len(await get_served_chats())
+    UP, CPU, RAM, DISK = await bot_sys_stats()  # Assuming bot_sys_stats is defined elsewhere
+    
+    # Ensure START string has the correct number of placeholders
+    try:
+        START_TEXT = START.format(users, chats, UP)  # Format the START text with dynamic data
+    except IndexError:
+        LOGGER.error("Error in START text formatting. Make sure the START string has enough placeholders.")
+        START_TEXT = "Error: Could not generate dynamic START text."
+        
+    return START_TEXT
+
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     LOGGER.info(query.data)
+
+    START_TEXT = await fetch_data()
 
     # Help menu
     if query.data == "HELP":
@@ -46,6 +78,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=HELP_READ,
             reply_markup=InlineKeyboardMarkup(HELP_BTN),
             disable_web_page_preview=True,
+        )
+
+    elif query.data == "HOME_BACK":
+        await query.message.edit(
+            text=START_TEXT,  # Use the dynamically fetched START_TEXT
+            reply_markup=InlineKeyboardMarkup(START_BOT),
         )
 
     # Close menu
