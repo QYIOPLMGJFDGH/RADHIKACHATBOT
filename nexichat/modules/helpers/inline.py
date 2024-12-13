@@ -16,7 +16,7 @@ START_BOT = [
         InlineKeyboardButton(text="˹ sᴜᴘᴘᴏꝛᴛ ˼", url=f"https://t.me/{SUPPORT_GRP}"),
     ],
     [
-        InlineKeyboardButton(text="˹ ᴜᴘᴅᴀᴛᴇ ˼", url=f"https://t.me/{UPDATE_CHANNEL}"),
+        InlineKeyboardButton(text="˹ ᴜᴘᴅᴀᴛᴇ ˼", url=f"https://t.me/{UPDATE_CHNL}"),
         InlineKeyboardButton(text="˹ ʜᴇʟᴘ ˼", callback_data="HELP"),
     ],
 ]
