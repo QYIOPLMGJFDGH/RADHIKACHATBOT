@@ -37,12 +37,12 @@ from nexichat.modules.helpers import (
 lang_db = db.ChatLangDb.LangCollection
 status_db = db.chatbot_status_db.status
 
-users = len(await get_served_users())
-chats = len(await get_served_chats())
-UP, CPU, RAM, DISK = await bot_sys_stats()
-
-# Format the START text by filling the placeholders with dynamic data
-START_TEXT = START.format(users, chats, UP)
+async def fetch_data():
+    users = len(await get_served_users())
+    chats = len(await get_served_chats())
+    UP, CPU, RAM, DISK = await bot_sys_stats()
+    START_TEXT = START.format(users, chats, UP)  # Format the START text with dynamic data
+    return START_TEXT
 
 @nexichat.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
