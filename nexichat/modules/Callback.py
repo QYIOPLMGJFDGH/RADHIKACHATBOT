@@ -5,7 +5,7 @@ from nexichat import _boot_
 from nexichat import get_readable_time
 from pymongo import MongoClient
 from pyrogram import Client, filters
-from Command import generate_language_buttons
+from nexichat.modules.Commands import generate_language_buttons
 from pyrogram.errors import MessageEmpty, UserIsBlocked
 from pyrogram.enums import ChatAction
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
