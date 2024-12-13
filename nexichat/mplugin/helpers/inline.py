@@ -60,11 +60,11 @@ BACK = [
 
 HELP_BTN = [
     [
-        InlineKeyboardButton(text="🐳 ᴄʜᴀᴛʙᴏᴛ 🐳", callback_data="CHATBOT_CMD"),
-        InlineKeyboardButton(text="🎄 ᴛᴏᴏʟs 🎄", callback_data="TOOLS_DATA"),
+        InlineKeyboardButton(text="◖ ᴄʜᴀᴛʙᴏᴛ ◗", callback_data="CHATBOT_CMD"),
+        InlineKeyboardButton(text="◖ ᴛᴏᴏʟs ◗", callback_data="TOOLS_DATA"),
     ],
     [
-        InlineKeyboardButton(text="⦿ ᴄʟᴏsᴇ ⦿", callback_data="HOME_BACK"),
+        InlineKeyboardButton(text="↺ ʙᴀᴄᴋ ↻", callback_data="HOME_BACK"),
     ],
 ]
 
