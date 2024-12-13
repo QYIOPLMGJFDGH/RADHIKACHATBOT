@@ -30,12 +30,9 @@ translator = GoogleTranslator()
 lang_db = db.ChatLangDb.LangCollection
 status_db = db.chatbot_status_db.status
 
-@nexichat.on_message(filters.command("status"))
-async def status_command(client: Client, message: Message):
+
+@nexichat.on_message(filters.command(["resetlang", "nolang"]))
+async def reset_language(client: Client, message: Message):
     chat_id = message.chat.id
-    chat_status = await status_db.find_one({"chat_id": chat_id})
-    if chat_status:
-        current_status = chat_status.get("status", "not found")
-        await message.reply(f"Chatbot status for this chat: **{current_status}**")
-    else:
-        await message.reply("No status found for this chat.")
+    lang_db.update_one({"chat_id": chat_id}, {"$set": {"language": "nolang"}}, upsert=True)
+    await message.reply_text("**Bot language has been reset in this chat to mix language.**")
