@@ -280,6 +280,7 @@ async def ls(_, m: Message):
 async def start(_, m: Message):
     users = len(await get_served_users())
     chats = len(await get_served_chats())
+    
     if m.chat.type == ChatType.PRIVATE:
         accha = await m.reply_text(
             text=random.choice(EMOJIOS),
@@ -326,27 +327,36 @@ async def start(_, m: Message):
         await asyncio.sleep(0.1)
         await accha.edit("**__ᴅιиg ᴅσиg ꨄ︎ ѕтαятιиg.__**")
         await asyncio.sleep(0.1)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ sтαятιиg.....__**")
+        await accha.edit("**__ᴅιиg ᴅσиг ꨄ sтαятιиg.....__**")
         await accha.delete()
         
         umm = await m.reply_sticker(sticker=random.choice(STICKER))
-        chat_photo = BOT  
-        if m.chat.photo:
-            try:
-                userss_photo = await nexichat.download_media(m.chat.photo.big_file_id)
-                await umm.delete()
-                if userss_photo:
-                    chat_photo = userss_photo
-            except AttributeError:
-                chat_photo = BOT  
+        
+        # Always use the bot's default image
+        chat_photo = BOT
 
         users = len(await get_served_users())
         chats = len(await get_served_chats())
         UP, CPU, RAM, DISK = await bot_sys_stats()
-        await m.reply_photo(photo=chat_photo, caption=START.format(nexichat.mention or "can't mention", users, chats, UP), reply_markup=InlineKeyboardMarkup(START_BOT))
+
+        # Send the bot's default photo
+        await m.reply_photo(
+            photo=chat_photo, 
+            caption=START.format(nexichat.mention or "can't mention", users, chats, UP), 
+            reply_markup=InlineKeyboardMarkup(START_BOT)
+        )
+        
         await add_served_user(m.chat.id)
+
         keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(f"{m.chat.first_name}", user_id=m.chat.id)]])
-        await nexichat.send_photo(int(OWNER_ID), photo=chat_photo, caption=f"{m.from_user.mention} ʜᴀs sᴛᴀʀᴛᴇᴅ ʙᴏᴛ. \n\n**ɴᴀᴍᴇ :** {m.chat.first_name}\n**ᴜsᴇʀɴᴀᴍᴇ :** @{m.chat.username}\n**ɪᴅ :** {m.chat.id}\n\n**ᴛᴏᴛᴀʟ ᴜsᴇʀs :** {users}", reply_markup=keyboard)
+        
+        # Send bot photo to the owner
+        await nexichat.send_photo(
+            int(OWNER_ID), 
+            photo=chat_photo, 
+            caption=f"{m.from_user.mention} ʜᴀs sᴛᴀʀᴛᴇᴅ ʙᴏᴛ. \n\n**ɴᴀᴍᴇ :** {m.chat.first_name}\n**ᴜsᴇʀɴᴀᴍᴇ :** @{m.chat.username}\n**ɪᴅ :** {m.chat.id}\n\n**ᴛᴏᴛᴀʟ ᴜsᴇʀs :** {users}", 
+            reply_markup=keyboard
+        )
         
     else:
         await m.reply_photo(
