@@ -5,7 +5,6 @@ from nexichat import _boot_
 from nexichat import get_readable_time
 from pymongo import MongoClient
 from pyrogram import Client, filters
-from nexichat.modules.Commands import generate_language_buttons
 from pyrogram.errors import MessageEmpty, UserIsBlocked
 from pyrogram.enums import ChatAction
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
@@ -131,37 +130,3 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=START_TEXT,  # Use the dynamically fetched START_TEXT
             reply_markup=InlineKeyboardMarkup(START_BOT),
         )
-
-    # Set chat language
-    elif query.data.startswith("setlang_"):
-        lang_code = query.data.split("_")[1]
-        chat_id = query.message.chat.id
-        if lang_code in languages.values():
-            lang_db.update_one({"chat_id": chat_id}, {"$set": {"language": lang_code}}, upsert=True)
-            await query.answer(f"Yᴏᴜʀ ᴄʜᴀᴛ ʟᴀɴɢᴜᴀɢᴇ ʜᴀs ʙᴇᴇɴ sᴇᴛ ᴛᴏ {lang_code.title()}.", show_alert=True)
-            await query.message.edit_text(f"ᴄʜᴀᴛ ʟᴀɴɢᴜᴀɢᴇ ʜᴀs ʙᴇᴇɴ sᴇᴛ ᴛᴏ {lang_code.title()}.")
-        else:
-            await query.answer("Invalid language selection.", show_alert=True)
-
-    # Reset language selection to mix language
-    elif query.data == "nolang":
-        chat_id = query.message.chat.id
-        lang_db.update_one({"chat_id": chat_id}, {"$set": {"language": "nolang"}}, upsert=True)
-        await query.answer("Bᴏᴛ ʟᴀɴɢᴜᴀɢᴇ ʜᴀs ʙᴇᴇɴ ʀᴇsᴇᴛ ᴛᴏ ᴍɪx ʟᴀɴɢᴜᴀɢᴇ.", show_alert=True)
-        await query.message.edit_text("**Bᴏᴛ ʟᴀɴɢᴜᴀɢᴇ ʜᴀs ʙᴇᴇɴ ʀᴇsᴇᴛ ᴛᴏ ᴍɪx ʟᴀɴɢᴜᴀɢᴇ.**")
-
-    # Choose language for the chatbot
-    elif query.data == "choose_lang":
-        await query.answer("Cʜᴏᴏsᴇ ᴄʜᴀᴛʙᴏᴛ ʟᴀɴɢᴜᴀɢᴇ ғᴏʀ ᴛʜɪs ᴄʜᴀᴛ.", show_alert=True)
-        await query.message.edit_text(
-            "**Pʟᴇᴀsᴇ sᴇʟᴇᴄᴛ ʏᴏᴜʀ ᴘʀᴇғᴇʀʀᴇᴅ ʟᴀɴɢᴜᴀɢᴇ ғᴏʀ ᴛʜᴇ ᴄʜᴀᴛʙᴏᴛ.**",
-            reply_markup=generate_language_buttons(languages)
-        )
-
-    # Handle UserIsBlocked gracefully
-    try:
-        # Here you can include message sending or editing operations
-        pass
-    except UserIsBlocked:
-        LOGGER.error(f"User blocked the bot in chat {query.message.chat.id}.")
-        await query.answer("You have blocked the bot. Please unblock it to continue.", show_alert=True)
