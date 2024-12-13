@@ -36,6 +36,7 @@ async def chatbot_command(client: Client, message: Message):
     )
 
 # Handle the callback query for enabling/disabling the chatbot
+# Handle the callback query for enabling/disabling the chatbot
 @nexichat.on_callback_query(filters.regex("enable_chatbot|disable_chatbot"))
 async def toggle_chatbot(client: Client, query: CallbackQuery):
     """Handle callback queries for enabling/disabling the chatbot."""
@@ -46,17 +47,28 @@ async def toggle_chatbot(client: Client, query: CallbackQuery):
         # Update the status to enabled in the database
         status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "enabled"}}, upsert=True)
         await query.answer("Cʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇ ✅", show_alert=True)
-        await query.edit_message_text(
-            f"Chat: {query.message.chat.title}\n**ᴄʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴇɴᴀʙʟᴇᴅ.**"
-        )
+        
+        # Edit the message to indicate that the chatbot has been enabled
+        try:
+            await query.message.edit_text(
+                f"Chat: {query.message.chat.title}\n**ᴄʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴇɴᴀʙʟᴇᴅ.**"
+            )
+        except Exception as e:
+            LOGGER.error(f"Error editing message: {e}")
 
     elif action == "disable_chatbot":
         # Update the status to disabled in the database
         status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "disabled"}}, upsert=True)
         await query.answer("ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇ ✅", show_alert=True)
-        await query.edit_message_text(
-            f"Chat: {query.message.chat.title}\n**ᴄʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ.**"
-        )
+        
+        # Edit the message to indicate that the chatbot has been disabled
+        try:
+            await query.message.edit_text(
+                f"Chat: {query.message.chat.title}\n**ᴄʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ.**"
+            )
+        except Exception as e:
+            LOGGER.error(f"Error editing message: {e}")
+
 
 # Helper function to check unwanted messages (messages starting with special characters)
 def is_unwanted_message(message: Message) -> bool:
