@@ -268,47 +268,22 @@ async def start(_, m: Message):
         )
         await asyncio.sleep(0.5)
         
-        await accha.edit("**__ᴅ__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅι__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιи__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅ__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσ__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσи__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσиg__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ︎__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ ѕ__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ sт__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ︎ ѕтα__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ︎ ѕтαя__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ sтαят__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ︎ sтαятι__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ︎ sтαятιи__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ sтαятιиg__**")
-        await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ︎ ѕтαятιиg.__**")
-        await asyncio.sleep(0.1)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ sтαятιиg.....__**")
-        await asyncio.sleep(0.1)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ︎ ѕтαятιиg.__**")
-        await asyncio.sleep(0.1)
-        await accha.edit("**__ᴅιиg ᴅσиг ꨄ sтαятιиg.....__**")
+        # Define the sequence of texts to be edited
+        text_sequence = [
+            "**__ᴅ__**", "**__ᴅι__**", "**__ᴅιи__**", "**__ᴅιиg__**", "**__ᴅιиg ᴅ__**", 
+            "**__ᴅιиg ᴅσ__**", "**__ᴅιиg ᴅσи__**", "**__ᴅιиg ᴅσиg__**", "**__ᴅιиg ᴅσиg ꨄ︎__**", 
+            "**__ᴅιиg ᴅσиg ꨄ ѕ__**", "**__ᴅιиg ᴅσиg ꨄ sт__**", "**__ᴅιиg ᴅσиg ꨄ︎ ѕтα__**", 
+            "**__ᴅιиg ᴅσиg ꨄ︎ ѕтαя__**", "**__ᴅιиg ᴅσиg ꨄ sтαят__**", "**__ᴅιиg ᴅσиg ꨄ︎ sтαятι__**", 
+            "**__ᴅιиg ᴅσиg ꨄ︎ sтαятιи__**", "**__ᴅιиg ᴅσиg ꨄ sтαятιиg__**", "**__ᴅιиg ᴅσиg ꨄ︎ ѕтαятιиg.__**", 
+            "**__ᴅιиg ᴅσиg ꨄ sтαятιиг.....__**", "**__ᴅιиg ᴅσиg ꨄ︎ ѕтαятιиг.__**", "**__ᴅιиg ᴅσиг ꨄ sтαятιиг.....__**"
+        ]
+        
+        # Iterate through the text sequence and update the message if content changes
+        for text in text_sequence:
+            if accha.text != text:  # Check if the text is different
+                await accha.edit(text)
+            await asyncio.sleep(0.01)
+
         await accha.delete()
 
         # Always use the bot's default image
