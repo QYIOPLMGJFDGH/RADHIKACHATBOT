@@ -36,49 +36,41 @@ async def chatbot_command(client: Client, message: Message):
         reply_markup=InlineKeyboardMarkup(CHATBOT_ON),
     )
 
-@nexichat.on_callback_query(filters.regex("enable_chatbot|disable_chatbot"))
-async def toggle_chatbot(client: Client, query: CallbackQuery):
-    """Handle callback queries for enabling/disabling the chatbot."""
-    chat_id = query.message.chat.id
-    action = query.data  # This will be either 'enable_chatbot' or 'disable_chatbot'
+@nexichat.on_callback_query()
+async def cb_handler(client: Client, query: CallbackQuery):
+    # Log the incoming callback query data
+    LOGGER.info(f"Callback query data: {query.data}")
 
     try:
-        # Show a pop-up message confirming the action
-        if action == "enable_chatbot":
-            # Update the status to enabled in the database
+        if query.data == "enable_chatbot":
+            # Enable the chatbot for the chat
+            chat_id = query.message.chat.id
             status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "enabled"}}, upsert=True)
-            
-            # Send pop-up confirmation
-            await query.answer("Cʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇ ✅", show_alert=True)
 
-            # Add a slight delay before editing the message (sometimes helps with response timing)
-            await asyncio.sleep(0.5)
+            # Show a pop-up confirmation
+            await query.answer("Chatbot enabled ✅", show_alert=True)
 
-            # Edit the original message with the status update
-            await query.message.edit_text(
-                f"Chat: {query.message.chat.title}\n**ᴄʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴇɴᴀʙʟᴇᴅ.**"
+            # Edit the message with the status update
+            await query.edit_message_text(
+                f"Chat: {query.message.chat.title}\n**Chatbot has been enabled.**"
             )
 
-        elif action == "disable_chatbot":
-            # Update the status to disabled in the database
+        elif query.data == "disable_chatbot":
+            # Disable the chatbot for the chat
+            chat_id = query.message.chat.id
             status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "disabled"}}, upsert=True)
-            
-            # Send pop-up confirmation
-            await query.answer("ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇ ✅", show_alert=True)
 
-            # Add a slight delay before editing the message
-            await asyncio.sleep(0.5)
+            # Show a pop-up confirmation
+            await query.answer("Chatbot disabled ✅", show_alert=True)
 
-            # Edit the original message with the status update
-            await query.message.edit_text(
-                f"Chat: {query.message.chat.title}\n**ᴄʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ.**"
+            # Edit the message with the status update
+            await query.edit_message_text(
+                f"Chat: {query.message.chat.title}\n**Chatbot has been disabled.**"
             )
-
-        # Optionally delete the inline button message after the update
-        # await query.message.delete()
 
     except Exception as e:
-        LOGGER.error(f"Error handling callback query: {e}")
+        LOGGER.error(f"Error processing callback query: {e}")
+
 
 
 
