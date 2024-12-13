@@ -298,7 +298,7 @@ async def start(_, m: Message):
     # Send bot stats to the user
     await m.reply_photo(
         photo=chat_photo, 
-        caption=START.format(nexichat.mention or "can't mention", users, chats, UP), 
+        caption=START.format(users, chats, UP), 
         reply_markup=InlineKeyboardMarkup(START_BOT)
     )
     
