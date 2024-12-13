@@ -75,7 +75,7 @@ HELP_BTN = [
 
 CLOSE_BTN = [
     [
-        InlineKeyboardButton(text="⦿ ᴄʟᴏsᴇ ⦿", callback_data="CLOSE"),
+        InlineKeyboardButton(text="↺ ᴄʟᴏsᴇ ↻", callback_data="CLOSE"),
     ],
 ]
 
@@ -96,16 +96,16 @@ MUSIC_BACK_BTN = [
 
 S_BACK = [
     [
-        InlineKeyboardButton(text="⦿ ʙᴀᴄᴋ ⦿", callback_data="SBACK"),
-        InlineKeyboardButton(text="⦿ ᴄʟᴏsᴇ ⦿", callback_data="CLOSE"),
+        InlineKeyboardButton(text="↺ ʙᴀᴄᴋ ↻", callback_data="SBACK"),
+        InlineKeyboardButton(text="↺ ᴄʟᴏsᴇ ↻", callback_data="CLOSE"),
     ],
 ]
 
 
 CHATBOT_BACK = [
     [
-        InlineKeyboardButton(text="⦿ ʙᴀᴄᴋ ⦿", callback_data="CHATBOT_BACK"),
-        InlineKeyboardButton(text="⦿ ᴄʟᴏsᴇ ⦿", callback_data="CLOSE"),
+        InlineKeyboardButton(text="↺ ʙᴀᴄᴋ ↻", callback_data="CHATBOT_BACK"),
+        InlineKeyboardButton(text="↺ ᴄʟᴏsᴇ ↻", callback_data="CLOSE"),
     ],
 ]
 
