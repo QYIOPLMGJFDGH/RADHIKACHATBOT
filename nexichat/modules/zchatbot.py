@@ -43,31 +43,38 @@ async def toggle_chatbot(client: Client, query: CallbackQuery):
     chat_id = query.message.chat.id
     action = query.data  # This will be either 'enable_chatbot' or 'disable_chatbot'
 
-    if action == "enable_chatbot":
-        # Update the status to enabled in the database
-        status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "enabled"}}, upsert=True)
-        await query.answer("Cʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇ ✅", show_alert=True)
-        
-        # Edit the message to indicate that the chatbot has been enabled
-        try:
-            await query.message.edit_text(
+    try:
+        # Show a pop-up message confirming the action
+        if action == "enable_chatbot":
+            # Update the status to enabled in the database
+            status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "enabled"}}, upsert=True)
+            
+            # Send pop-up confirmation
+            await query.answer("Cʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇ ✅", show_alert=True)
+
+            # Send a new message with the status update (instead of editing the existing one)
+            await query.message.reply_text(
                 f"Chat: {query.message.chat.title}\n**ᴄʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴇɴᴀʙʟᴇᴅ.**"
             )
-        except Exception as e:
-            LOGGER.error(f"Error editing message: {e}")
 
-    elif action == "disable_chatbot":
-        # Update the status to disabled in the database
-        status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "disabled"}}, upsert=True)
-        await query.answer("ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇ ✅", show_alert=True)
-        
-        # Edit the message to indicate that the chatbot has been disabled
-        try:
-            await query.message.edit_text(
+        elif action == "disable_chatbot":
+            # Update the status to disabled in the database
+            status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "disabled"}}, upsert=True)
+            
+            # Send pop-up confirmation
+            await query.answer("ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇ ✅", show_alert=True)
+
+            # Send a new message with the status update (instead of editing the existing one)
+            await query.message.reply_text(
                 f"Chat: {query.message.chat.title}\n**ᴄʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ.**"
             )
-        except Exception as e:
-            LOGGER.error(f"Error editing message: {e}")
+
+        # Delete the original message (the one with the inline buttons)
+        await query.message.delete()
+
+    except Exception as e:
+        LOGGER.error(f"Error handling callback query: {e}")
+
 
 
 # Helper function to check unwanted messages (messages starting with special characters)
