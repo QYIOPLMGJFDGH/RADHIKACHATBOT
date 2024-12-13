@@ -44,23 +44,14 @@ DEV_OP = [
 
 PNG_BTN = [
     [
-        InlineKeyboardButton(
-            text="😍 ᴀᴅᴅ ᴍᴇ ʙᴀʙʏ 😍",
-            url="https://t.me/Goodbyenjbot?startgroup=true",
-        ),
-    ],
-    [
-        InlineKeyboardButton(
-            text="⦿ ᴄʟᴏsᴇ ⦿",
-            callback_data="CLOSE",
-        ),
+        InlineKeyboardButton(text="⦿ ʙᴀᴄᴋ ⦿", callback_data="BACK"),
     ],
 ]
 
 
 BACK = [
     [
-        InlineKeyboardButton(text="⦿ ʙᴀᴄᴋ ⦿", callback_data="BACK"),
+        InlineKeyboardButton(text="↺ ᴄʟᴏsᴇ ↻", callback_data="CLOSE"),
     ],
 ]
 
@@ -71,7 +62,7 @@ HELP_BTN = [
         InlineKeyboardButton(text="🎄 ᴛᴏᴏʟs 🎄", callback_data="TOOLS_DATA"),
     ],
     [
-        InlineKeyboardButton(text="⦿ ᴄʟᴏsᴇ ⦿", callback_data="HOME_BACK"),
+        InlineKeyboardButton(text="↺ ᴄʟᴏsᴇ ↻", callback_data="HOME_BACK"),
     ],
 ]
 
