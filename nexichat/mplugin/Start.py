@@ -284,6 +284,20 @@ async def start(client: Client, m: Message):
         await add_served_chat(m.chat.id)
 
 
+@Client.on_cmd("help")
+async def help(client: nexichat, m: Message):
+    if m.chat.type == ChatType.PRIVATE:
+        hmm = await m.reply_text(
+            text=HELP_READ,
+            reply_markup=InlineKeyboardMarkup(HELP_BTN),
+        )
+
+    else:
+        await m.reply_text(
+            text="**__Hᴇʏ, ᴘᴍ ᴍᴇ ғᴏʀ ʜᴇʟᴘ ᴄᴏᴍᴍᴀɴᴅs__!**",
+            reply_markup=InlineKeyboardMarkup(HELP_BUTN),
+        )
+        await add_served_chat(m.chat.id)
 
 @Client.on_message(filters.command("ping"))
 async def ping(client: Client, message: Message):
