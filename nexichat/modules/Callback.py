@@ -1,4 +1,5 @@
 import random
+import psutil
 from pymongo import MongoClient
 from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
@@ -36,6 +37,17 @@ from nexichat.modules.helpers import (
 lang_db = db.ChatLangDb.LangCollection
 status_db = db.chatbot_status_db.status
 
+async def bot_sys_stats():
+    bot_uptime = int(time.time() - _boot_)
+    cpu = psutil.cpu_percent(interval=0.5)
+    mem = psutil.virtual_memory().percent
+    disk = psutil.disk_usage("/").percent
+    UP = f"{get_readable_time((bot_uptime))}"
+    CPU = f"{cpu}%"
+    RAM = f"{mem}%"
+    DISK = f"{disk}%"
+    return UP, CPU, RAM, DISK
+    
 # Fetch dynamic START_TEXT
 async def fetch_data():
     users = len(await get_served_users())
