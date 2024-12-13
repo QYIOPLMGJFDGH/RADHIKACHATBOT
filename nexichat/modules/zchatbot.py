@@ -1,4 +1,5 @@
 import random
+import asyncio
 from pymongo import MongoClient
 from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
@@ -35,7 +36,6 @@ async def chatbot_command(client: Client, message: Message):
         reply_markup=InlineKeyboardMarkup(CHATBOT_ON),
     )
 
-
 @nexichat.on_callback_query(filters.regex("enable_chatbot|disable_chatbot"))
 async def toggle_chatbot(client: Client, query: CallbackQuery):
     """Handle callback queries for enabling/disabling the chatbot."""
@@ -51,6 +51,9 @@ async def toggle_chatbot(client: Client, query: CallbackQuery):
             # Send pop-up confirmation
             await query.answer("Cʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇ ✅", show_alert=True)
 
+            # Add a slight delay before editing the message (sometimes helps with response timing)
+            await asyncio.sleep(0.5)
+
             # Edit the original message with the status update
             await query.message.edit_text(
                 f"Chat: {query.message.chat.title}\n**ᴄʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴇɴᴀʙʟᴇᴅ.**"
@@ -62,6 +65,9 @@ async def toggle_chatbot(client: Client, query: CallbackQuery):
             
             # Send pop-up confirmation
             await query.answer("ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇ ✅", show_alert=True)
+
+            # Add a slight delay before editing the message
+            await asyncio.sleep(0.5)
 
             # Edit the original message with the status update
             await query.message.edit_text(
