@@ -22,10 +22,13 @@ async def clone_txt(client, message):
     if len(message.command) > 1:
         bot_token = message.text.split("/clone", 1)[1].strip()
         mi = await message.reply_text("Please wait while I check the bot token.")
+        
+        bot = None  # Initialize bot as None to avoid UnboundLocalError
+
         try:
             ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root="nexichat/mplugin"))
             await ai.start()
-            bot = await ai.get_me()
+            bot = await ai.get_me()  # Only here the bot is assigned
             bot_id = bot.id
             user_id = message.from_user.id
             CLONE_OWNERS[bot_id] = user_id
@@ -37,6 +40,10 @@ async def clone_txt(client, message):
             if cloned_bot:
                 await mi.edit_text("**🤖 Your bot is already cloned ✅**")
                 return
+
+        if bot is None:  # Add a check to ensure bot was successfully fetched
+            await mi.edit_text("**Failed to fetch bot details. Please try again with a valid token.**")
+            return
 
         await mi.edit_text("**Cloning process started. Please wait for the bot to start.**")
         try:
