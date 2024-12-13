@@ -28,6 +28,7 @@ from nexichat.modules.helpers import (
     MUSIC_BACK_BTN,
     SOURCE_READ,
     START,
+    START_BOT,
     TOOLS_DATA_READ,
     languages,
 )
