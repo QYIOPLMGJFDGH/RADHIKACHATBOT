@@ -23,6 +23,7 @@ from nexichat.mplugin.helpers import (
     ABOUT_BTN,
     ABOUT_READ,
     ADMIN_READ,
+    START_BOT,
     BACK,
     CHATBOT_BACK,
     CHATBOT_READ,
