@@ -5,7 +5,7 @@ from nexichat import _boot_
 from nexichat import get_readable_time
 from pymongo import MongoClient
 from pyrogram import Client, filters
-from pyrogram.errors import MessageEmpty
+from pyrogram.errors import MessageEmpty, UserIsBlocked
 from pyrogram.enums import ChatAction
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from deep_translator import GoogleTranslator
@@ -40,6 +40,7 @@ from nexichat.modules.helpers import (
 lang_db = db.ChatLangDb.LangCollection
 status_db = db.chatbot_status_db.status
 
+# Function to get bot system stats
 async def bot_sys_stats():
     bot_uptime = int(time.time() - _boot_)
     cpu = psutil.cpu_percent(interval=0.5)
@@ -50,13 +51,20 @@ async def bot_sys_stats():
     RAM = f"{mem}%"
     DISK = f"{disk}%"
     return UP, CPU, RAM, DISK
-    
+
 # Fetch dynamic START_TEXT
 async def fetch_data():
     users = len(await get_served_users())
     chats = len(await get_served_chats())
     UP, CPU, RAM, DISK = await bot_sys_stats()  # Assuming bot_sys_stats is defined elsewhere
-    START_TEXT = START.format(users, chats, UP)  # Format the START text with dynamic data
+    
+    # Ensure START string has the correct number of placeholders
+    try:
+        START_TEXT = START.format(users, chats, UP)  # Format the START text with dynamic data
+    except IndexError:
+        LOGGER.error("Error in START text formatting. Make sure the START string has enough placeholders.")
+        START_TEXT = "Error: Could not generate dynamic START text."
+        
     return START_TEXT
 
 @nexichat.on_callback_query()
@@ -186,3 +194,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
             "**Please select your preferred language for the chatbot.**",
             reply_markup=generate_language_buttons(languages)
         )
+
+    # Handle UserIsBlocked gracefully
+    try:
+        # Here you can include message sending or editing operations
+        pass
+    except UserIsBlocked:
+        LOGGER.error(f"User blocked the bot in chat {query.message.chat.id}.")
+        await query.answer("You have blocked the bot. Please unblock it to continue.", show_alert=True)
