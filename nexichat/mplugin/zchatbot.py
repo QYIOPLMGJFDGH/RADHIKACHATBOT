@@ -52,16 +52,24 @@ async def chatbot_command(client: Client, message: Message):
         )
 
 # Handle /status command to check the chatbot status in private chats
-@Client.on_message(filters.command("status") & filters.private)
+@Client.on_message(filters.command("status") & (filters.private | filters.group))
 async def status_command(client: Client, message: Message):
-    """Handle /status command to show chatbot status in private chat."""
+    """Handle /status command to show chatbot status in private chat and group chat."""
     user_id = message.from_user.id
+    chat_id = message.chat.id
     chat_status = status_db.find_one({"chat_id": user_id})
 
     if chat_status and chat_status.get("status") == "enabled":
-        await message.reply_text("ᴄʜᴀᴛʙᴏᴛ : ᴇɴᴀʙʟᴇ")
+        status_message = "ᴄʜᴀᴛʙᴏᴛ : ᴇɴᴀʙʟᴇ"
     else:
-        await message.reply_text("ᴄʜᴀᴛʙᴏᴛ : ᴅɪsᴀʙʟᴇ")
+        status_message = "ᴄʜᴀᴛʙᴏᴛ : ᴅɪsᴀʙʟᴇ"
+
+    # If the message is in a group, reply in the group, otherwise in private
+    if message.chat.type == "private":
+        await message.reply_text(status_message)
+    else:
+        await message.reply_text(f"Group chat status: {status_message}")
+
 
 # Helper function to check unwanted messages
 def is_unwanted_message(message: Message) -> bool:
