@@ -254,9 +254,8 @@ async def start(client: Client, m: Message):
         chats = len(await get_served_chats())
         UP, CPU, RAM, DISK = await bot_sys_stats()
 
-        await m.reply_photo(
-            photo=chat_photo,
-            caption=START.format(users, chats, UP),
+        await m.reply_text(
+            text=START.format(users, chats, UP),
             reply_markup=InlineKeyboardMarkup(START_BOT)
         )
 
@@ -270,7 +269,7 @@ async def start(client: Client, m: Message):
         bot_id = client.me.id
         owner_id = CLONE_OWNERS.get(bot_id)
         if owner_id:
-            await client.send_text(
+            await client.send_message(
                 int(owner_id),
                 caption=f"{m.from_user.mention} ʜᴀs sᴛᴀʀᴛᴇᴅ ʙᴏᴛ. \n\n**ɴᴀᴍᴇ :** {m.chat.first_name}\n**ᴜsᴇʀɴᴀᴍᴇ :** @{m.chat.username}\n**ɪᴅ :** {m.chat.id}\n\n**ᴛᴏᴛᴀʟ ᴜsᴇʀs :** {users}",
                 reply_markup=keyboard
