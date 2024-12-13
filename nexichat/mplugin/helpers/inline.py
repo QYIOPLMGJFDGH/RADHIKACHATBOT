@@ -5,9 +5,19 @@ from nexichat import OWNER, nexichat
 
 
 START_BOT = [
-    
     [
-        InlineKeyboardButton(text="🛠️ σρεи ¢σммαиdꜱ ⚙️", callback_data="HELP"),
+        InlineKeyboardButton(
+            text="❖ ᴛᴧᴘ тᴏ sᴇᴇ ᴍᴧɢɪᴄ ❖",
+            url=f"https://t.me/{nexichat.username}?startgroup=true",
+        ),
+    ],
+    [
+        InlineKeyboardButton(text="˹ ❍ᴡɴᴇꝛ ˼", user_id=OWNER),
+        InlineKeyboardButton(text="˹ sᴜᴘᴘᴏꝛᴛ ˼", url=f"https://t.me/{SUPPORT_GRP}"),
+    ],
+    [
+        InlineKeyboardButton(text="˹ ᴜᴘᴅᴀᴛᴇ ˼", url=f"https://t.me/{UPDATE_CHNL}"),
+        InlineKeyboardButton(text="˹ ʜᴇʟᴘ ˼", callback_data="HELP"),
     ],
 ]
 
