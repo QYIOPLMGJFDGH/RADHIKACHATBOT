@@ -33,7 +33,7 @@ async def chatbot_command(client: Client, message: Message):
         
         # Send confirmation message
         await message.reply_text(
-            f"Chat: {message.chat.title}\n**Chatbot has been enabled.**"
+            f"Cʜᴀᴛ: ➥ {message.chat.title}\nCʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴇɴᴀʙʟᴇᴅ.**"
         )
         
     elif command == "off":
@@ -42,13 +42,13 @@ async def chatbot_command(client: Client, message: Message):
 
         # Send confirmation message
         await message.reply_text(
-            f"Chat: {message.chat.title}\n**Chatbot has been disabled.**"
+            f"Cʜᴀᴛ: ➥{message.chat.title}\n**Cʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ.**"
         )
         
     else:
         # If no valid command is provided, show a help message
         await message.reply_text(
-            "Usage:\n/chatbot on - to enable the chatbot\n/chatbot off - to disable the chatbot"
+            "Usᴇs:⤸⤸⤸\n/chatbot on - ᴛᴏ ᴇɴᴀʙʟᴇ ᴛʜᴇ ᴄʜᴀᴛʙᴏᴛ\n/chatbot off - ᴛᴏ ᴅɪsᴀʙʟᴇ ᴛʜᴇ ᴄʜᴀᴛʙᴏᴛ"
         )
 
 # Handle /status command to check the chatbot status in private chats
