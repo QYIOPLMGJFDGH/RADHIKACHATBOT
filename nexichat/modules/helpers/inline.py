@@ -111,8 +111,8 @@ S_BACK = [
 
 CHATBOT_BACK = [
     [
-        InlineKeyboardButton(text="⦿ ʙᴀᴄᴋ ⦿", callback_data="CHATBOT_BACK"),
-        InlineKeyboardButton(text="⦿ ᴄʟᴏsᴇ ⦿", callback_data="CLOSE"),
+        InlineKeyboardButton(text="↺ ʙᴀᴄᴋ ↻", callback_data="CHATBOT_BACK"),
+        InlineKeyboardButton(text="↺ ᴄʟᴏsᴇ ↻", callback_data="CLOSE"),
     ],
 ]
 
