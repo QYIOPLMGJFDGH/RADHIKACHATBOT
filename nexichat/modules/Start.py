@@ -264,7 +264,7 @@ async def start(_, m: Message):
     
     if m.chat.type == ChatType.PRIVATE:
         accha = await m.reply_text(
-            text=random.choice(EMOJIOS),
+            text="**__ᴅ__**"
         )
         await asyncio.sleep(0.5)
         
@@ -286,7 +286,7 @@ async def start(_, m: Message):
         await asyncio.sleep(0.01)
         await accha.edit("**__ᴅιиg ᴅσиg ꨄ︎__**")
         await asyncio.sleep(0.01)
-        await accha.edit("**__ᴅιиg ᴅσиg ꨄ︎ ѕ__**")
+        await accha.edit("**__ᴅιиg ᴅσиg ꨄ ѕ__**")
         await asyncio.sleep(0.01)
         await accha.edit("**__ᴅιиg ᴅσиg ꨄ sт__**")
         await asyncio.sleep(0.01)
@@ -310,9 +310,7 @@ async def start(_, m: Message):
         await asyncio.sleep(0.1)
         await accha.edit("**__ᴅιиg ᴅσиг ꨄ sтαятιиg.....__**")
         await accha.delete()
-        
-        umm = await m.reply_sticker(sticker=random.choice(STICKER))
-        
+
         # Always use the bot's default image
         chat_photo = BOT
 
@@ -346,6 +344,7 @@ async def start(_, m: Message):
             reply_markup=InlineKeyboardMarkup(HELP_START),
         )
         await add_served_chat(m.chat.id)
+
 
 
 @nexichat.on_cmd("help")
