@@ -3,20 +3,19 @@ from pymongo import MongoClient
 from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
 from pyrogram.enums import ChatAction
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
-from pyrogram.types import CallbackQuery, InlineKeyboardMarkup
-from pyrogram.enums import ChatMemberStatus as CMS
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
+from pyrogram import Client
 import asyncio
 import config
-from nexichat import nexichat
-from nexichat import mongo, db, LOGGER, nexichat as shizuchat
+from nexichat import nexichat, LOGGER, shizuchat
 
 # Single MongoDB connection instance
 client_db = MongoClient(config.MONGO_URL)
 chatai = client_db["Word"]["WordDb"]
 vick_db = client_db["VickDb"]["Vick"]
-status_db = client_db["StatusDb"]["ChatStatus"]  # Assuming you're using this to store chat statuses.
+status_db = client_db["StatusDb"]["ChatStatus"]  # Chat status collection for enabling/disabling
 
+# Inline buttons for enabling/disabling the chatbot
 CHATBOT_ON = [
     [
         InlineKeyboardButton(text="ᴇɴᴀʙʟᴇ", callback_data="enable_chatbot"),
@@ -24,6 +23,7 @@ CHATBOT_ON = [
     ],
 ]
 
+# Handle the /chatbot command to show inline buttons for enabling/disabling the chatbot
 @nexichat.on_message(filters.command("chatbot"))
 async def chatbot_command(client: Client, message: Message):
     """Handle /chatbot command to show inline buttons for enabling/disabling chatbot."""
@@ -32,6 +32,7 @@ async def chatbot_command(client: Client, message: Message):
         reply_markup=InlineKeyboardMarkup(CHATBOT_ON),
     )
 
+# Handle the callback query for enabling/disabling the chatbot
 @nexichat.on_callback_query(filters.regex("enable_chatbot|disable_chatbot"))
 async def toggle_chatbot(client: Client, query: CallbackQuery):
     """Handle callback queries for enabling/disabling the chatbot."""
@@ -39,6 +40,7 @@ async def toggle_chatbot(client: Client, query: CallbackQuery):
     action = query.data  # This will be either 'enable_chatbot' or 'disable_chatbot'
 
     if action == "enable_chatbot":
+        # Update the status to enabled in the database
         status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "enabled"}}, upsert=True)
         await query.answer("Cʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇ ✅", show_alert=True)
         await query.edit_message_text(
@@ -46,19 +48,27 @@ async def toggle_chatbot(client: Client, query: CallbackQuery):
         )
 
     elif action == "disable_chatbot":
+        # Update the status to disabled in the database
         status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "disabled"}}, upsert=True)
         await query.answer("ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇ ✅", show_alert=True)
         await query.edit_message_text(
             f"Chat: {query.message.chat.title}\n**ᴄʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ.**"
         )
 
-# Helper function to check unwanted messages
+# Helper function to check unwanted messages (messages starting with special characters)
 def is_unwanted_message(message: Message) -> bool:
     return message.text.startswith(("!", "/", "?", "@", "#"))
 
 # Helper function to handle chatbot responses (reply with text or sticker)
 async def handle_chatbot_response(client: Client, message: Message, word: str):
     try:
+        # Check if the chatbot is enabled for the chat
+        chat_status = status_db.find_one({"chat_id": message.chat.id})
+        if chat_status and chat_status.get("status") == "disabled":
+            # If the chatbot is disabled, do not respond
+            return
+
+        # If no reply is present in the message
         if not message.reply_to_message:
             is_vick = vick_db.find_one({"chat_id": message.chat.id})
             if not is_vick:
@@ -72,9 +82,10 @@ async def handle_chatbot_response(client: Client, message: Message, word: str):
                     else:
                         await message.reply_text(hey)
 
+        # Handle reply messages
         elif message.reply_to_message:
             is_vick = vick_db.find_one({"chat_id": message.chat.id})
-            
+
             if message.reply_to_message.from_user.id == client.id and not is_vick:
                 await client.send_chat_action(message.chat.id, ChatAction.TYPING)
                 K = [x["text"] for x in chatai.find({"word": word})]
@@ -85,7 +96,7 @@ async def handle_chatbot_response(client: Client, message: Message, word: str):
                         await message.reply_sticker(hey)
                     else:
                         await message.reply_text(hey)
-            
+
             if message.reply_to_message.from_user.id != client.id:
                 # Insert new word-text pair if not found
                 if message.text:
@@ -100,7 +111,7 @@ async def handle_chatbot_response(client: Client, message: Message, word: str):
     except Exception as e:
         LOGGER.error(f"Error in handle_chatbot_response: {e}")
 
-# Handle chat messages for text or stickers in group chats
+# Handle chat messages for text or stickers in group chats (when the chatbot is enabled)
 @shizuchat.on_message((filters.text | filters.sticker | filters.group) & ~filters.private & ~filters.bot)
 async def chatbot_response(client: Client, message: Message):
     try:
