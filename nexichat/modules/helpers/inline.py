@@ -123,10 +123,7 @@ HELP_START = [
 
 HELP_BUTN = [
     [
-        InlineKeyboardButton(
-            text="« ʜᴇʟᴘ »", url="https://t.me/Goodbyenjbot?start=help"
-        ),
-        InlineKeyboardButton(text="⦿ ᴄʟᴏsᴇ ⦿", callback_data="CLOSE"),
+        InlineKeyboardButton(text="➥ ᴏᴘᴇɴ ɪɴ ᴘʀɪᴠɪᴛᴇ", url="https://t.me/RADHIKA_CHAT_RROBOT?start=help"),
     ],
 ]
 
