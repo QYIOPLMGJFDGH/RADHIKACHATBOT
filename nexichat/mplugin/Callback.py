@@ -9,8 +9,8 @@ from pyrogram.errors import MessageEmpty
 from pyrogram.enums import ChatAction
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from deep_translator import GoogleTranslator
-from nexichat.database.chats import add_served_chat
-from nexichat.database.users import add_served_user
+from nexichat.database.chats import get_served_chats, add_served_chat
+from nexichat.database.users import get_served_users, add_served_user
 from config import MONGO_URL
 from nexichat import nexichat, mongo
 from pyrogram.enums import ChatMemberStatus as CMS
