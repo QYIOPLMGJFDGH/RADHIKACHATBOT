@@ -19,57 +19,42 @@ chatai = client_db["Word"]["WordDb"]
 vick_db = client_db["VickDb"]["Vick"]
 status_db = client_db["StatusDb"]["ChatStatus"]  # Chat status collection for enabling/disabling
 
-# Inline buttons for enabling/disabling the chatbot
-CHATBOT_ON = [
-    [
-        InlineKeyboardButton(text="ᴇɴᴀʙʟᴇ", callback_data="enable_chatbot"),
-        InlineKeyboardButton(text="ᴅɪsᴀʙʟᴇ", callback_data="disable_chatbot"),
-    ],
-]
-
-# Handle the /chatbot command to show inline buttons for enabling/disabling the chatbot
+# Handle the /chatbot command to enable or disable the chatbot
 @nexichat.on_message(filters.command("chatbot"))
 async def chatbot_command(client: Client, message: Message):
-    """Handle /chatbot command to show inline buttons for enabling/disabling chatbot."""
-    await message.reply_text(
-        f"Chat: {message.chat.title}\n**Choose an option to enable/disable the chatbot.**",
-        reply_markup=InlineKeyboardMarkup(CHATBOT_ON),
-    )
+    """Handle /chatbot command to enable/disable chatbot."""
+    # Check if the message is "/chatbot on" or "/chatbot off"
+    if len(message.command) > 1:
+        command = message.command[1].lower()  # Get the second part of the command
+    else:
+        command = ''
 
-@nexichat.on_callback_query()
-async def cb_handler(client: Client, query: CallbackQuery):
-    # Log the incoming callback query data
-    LOGGER.info(f"Callback query data: {query.data}")
+    if command == "on":
+        # Enable the chatbot for the chat
+        chat_id = message.chat.id
+        status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "enabled"}}, upsert=True)
+        
+        # Send confirmation message
+        await message.reply_text(
+            f"Chat: {message.chat.title}\n**Chatbot has been enabled.**"
+        )
+        
+    elif command == "off":
+        # Disable the chatbot for the chat
+        chat_id = message.chat.id
+        status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "disabled"}}, upsert=True)
 
-    try:
-        if query.data == "enable_chatbot":
-            # Enable the chatbot for the chat
-            chat_id = query.message.chat.id
-            status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "enabled"}}, upsert=True)
+        # Send confirmation message
+        await message.reply_text(
+            f"Chat: {message.chat.title}\n**Chatbot has been disabled.**"
+        )
+        
+    else:
+        # If no valid command is provided, show a help message
+        await message.reply_text(
+            "Usage:\n/chatbot on - to enable the chatbot\n/chatbot off - to disable the chatbot"
+        )
 
-            # Show a pop-up confirmation
-            await query.answer("Chatbot enabled ✅", show_alert=True)
-
-            # Edit the message with the status update
-            await query.edit_message_text(
-                f"Chat: {query.message.chat.title}\n**Chatbot has been enabled.**"
-            )
-
-        elif query.data == "disable_chatbot":
-            # Disable the chatbot for the chat
-            chat_id = query.message.chat.id
-            status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "disabled"}}, upsert=True)
-
-            # Show a pop-up confirmation
-            await query.answer("Chatbot disabled ✅", show_alert=True)
-
-            # Edit the message with the status update
-            await query.edit_message_text(
-                f"Chat: {query.message.chat.title}\n**Chatbot has been disabled.**"
-            )
-
-    except Exception as e:
-        LOGGER.error(f"Error processing callback query: {e}")
 
 
 
