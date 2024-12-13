@@ -259,68 +259,62 @@ async def ls(_, m: Message):
 
 @nexichat.on_cmd(["start", "aistart"])
 async def start(_, m: Message):
+    # Initializing the progress bar message
+    baby = await m.reply_text(f"**▒▒▒▒▒▒▒▒▒▒ 0%**")
+    
+    # Simulating progress updates
+    await baby.edit_text(f"**█▒▒▒▒▒▒▒▒▒ 10%**")
+    await asyncio.sleep(0.5)
+    await baby.edit_text(f"**██▒▒▒▒▒▒▒▒ 20%**")
+    await asyncio.sleep(0.5)
+    await baby.edit_text(f"**███▒▒▒▒▒▒▒ 30%**")
+    await asyncio.sleep(0.5)
+    await baby.edit_text(f"**████▒▒▒▒▒▒ 40%**")
+    await asyncio.sleep(0.5)
+    await baby.edit_text(f"**█████▒▒▒▒▒ 50%**")
+    await asyncio.sleep(0.5)
+    await baby.edit_text(f"**██████▒▒▒▒ 60%**")
+    await asyncio.sleep(0.5)
+    await baby.edit_text(f"**███████▒▒▒ 70%**")
+    await asyncio.sleep(0.5)
+    await baby.edit_text(f"**████████▒▒ 80%**")
+    await asyncio.sleep(0.5)
+    await baby.edit_text(f"**█████████▒ 90%**")
+    await asyncio.sleep(0.5)
+    await baby.edit_text(f"**██████████ 100%**")
+    await asyncio.sleep(0.5)
+    
+    # After reaching 100%, notify the user and delete the progress message
+    await baby.edit_text(f"**❖ ɴᴏᴡ sᴛᴀʀᴛᴇᴅ..**")
+    await asyncio.sleep(0.5)
+    await baby.delete()
+
+    # Send the bot's default photo and stats
+    chat_photo = BOT
     users = len(await get_served_users())
     chats = len(await get_served_chats())
+    UP, CPU, RAM, DISK = await bot_sys_stats()
+
+    # Send bot stats to the user
+    await m.reply_photo(
+        photo=chat_photo, 
+        caption=START.format(nexichat.mention or "can't mention", users, chats, UP), 
+        reply_markup=InlineKeyboardMarkup(START_BOT)
+    )
     
-    if m.chat.type == ChatType.PRIVATE:
-        # Send initial text
-        accha = await m.reply_text("**__ᴅ__**")
-        await asyncio.sleep(0.5)
-        
-        # Create a list of texts for editing
-        texts = [
-            "**__ᴅ__**", "**__ᴅι__**", "**__ᴅιи__**", "**__ᴅιиg__**", 
-            "**__ᴅιиg ᴅ__**", "**__ᴅιиg ᴅσ__**", "**__ᴅιиg ᴅσи__**", 
-            "**__ᴅιиg ᴅσиg__**", "**__ᴅιиg ᴅσиg ꨄ︎__**", 
-            "**__ᴅιиg ᴅσиg ꨄ︎ ѕ__**", "**__ᴅιиg ᴅσиg ꨄ sт__**", 
-            "**__ᴅιиg ᴅσиg ꨄ︎ ѕтα__**", "**__ᴅιиg ᴅσиg ꨄ︎ ѕтαя__**", 
-            "**__ᴅιиg ᴅσиg ꨄ sтαят__**", "**__ᴅιиg ᴅσиg ꨄ︎ sтαятι__**", 
-            "**__ᴅιиg ᴅσиg ꨄ︎ sтαятιи__**", "**__ᴅιиg ᴅσиg ꨄ sтαятιиg__**", 
-            "**__ᴅιиg ᴅσиg ꨄ︎ ѕтαятιиg.__**", "**__ᴅιиg ᴅσиg ꨄ sтαятιиg.....__**", 
-            "**__ᴅιиg ᴅσиg ꨄ︎ ѕтαятιиg.__**", "**__ᴅιиg ᴅσиg ꨄ sтαятιиg.....__**"
-        ]
-        
-        # Iterate through the texts list to apply edits
-        for text in texts:
-            await accha.edit(text)
-            await asyncio.sleep(0.01)  # Short sleep to mimic typing effect
-        
-        # Delete the message after all edits
-        await accha.delete()
+    await add_served_user(m.chat.id)
 
-        # Always use the bot's default image
-        chat_photo = BOT
-
-        users = len(await get_served_users())
-        chats = len(await get_served_chats())
-        UP, CPU, RAM, DISK = await bot_sys_stats()
-
-        # Send the bot's default photo
-        await m.reply_photo(
-            photo=chat_photo, 
-            caption=START.format(nexichat.mention or "can't mention", users, chats, UP), 
-            reply_markup=InlineKeyboardMarkup(START_BOT)
-        )
-        
-        await add_served_user(m.chat.id)
-
-        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(f"{m.chat.first_name}", user_id=m.chat.id)]])
-        
-        # Send bot photo to the owner
-        await nexichat.send_photo(
-            int(OWNER_ID), 
-            photo=chat_photo, 
-            caption=f"{m.from_user.mention} ʜᴀs sᴛᴀʀᴛᴇᴅ ʙᴏᴛ. \n\n**ɴᴀᴍᴇ :** {m.chat.first_name}\n**ᴜsᴇʀɴᴀᴍᴇ :** @{m.chat.username}\n**ɪᴅ :** {m.chat.id}\n\n**ᴛᴏᴛᴀʟ ᴜsᴇʀs :** {users}", 
-            reply_markup=keyboard
-        )
-        
-    else:
-        await m.reply_photo(
-            photo=random.choice(IMG),
-            caption=GSTART.format(m.from_user.mention or "can't mention"),
-            reply_markup=InlineKeyboardMarkup(HELP_START),
-        )
-        await add_served_chat(m.chat.id)
+    keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(f"{m.chat.first_name}", user_id=m.chat.id)]])
+    
+    # Send bot photo to the owner
+    await nexichat.send_photo(
+        int(OWNER_ID), 
+        photo=chat_photo, 
+        caption=f"{m.from_user.mention} ʜᴀs sᴛᴀʀᴛᴇᴅ ʙᴏᴛ. \n\n**ɴᴀᴍᴇ :** {m.chat.first_name}\n**ᴜsᴇʀɴᴀᴍᴇ :** @{m.chat.username}\n**ɪᴅ :** {m.chat.id}\n\n**ᴛᴏᴛᴀʟ ᴜsᴇʀs :** {users}", 
+        reply_markup=keyboard
+    )
+    
+    await add_served_chat(m.chat.id)
 
 
 
