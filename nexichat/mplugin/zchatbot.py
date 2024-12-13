@@ -1,222 +1,146 @@
 import random
+import asyncio
 from pymongo import MongoClient
-from pyrogram import Client 
 from pyrogram import filters
+from pyrogram import Client
 from pyrogram.errors import MessageEmpty
 from pyrogram.enums import ChatAction
-from datetime import datetime, timedelta
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
-from deep_translator import GoogleTranslator 
-from nexichat.database.chats import add_served_chat
-from nexichat.database.users import add_served_user
-from config import MONGO_URL
-from nexichat import mongo, db
-from pyrogram.types import Message
-from nexichat.mplugin.helpers import CHATBOT_ON, chatai, languages
-from pymongo import MongoClient
-from nexichat import mongo
-from pyrogram.enums import ChatMemberStatus as CMS
 from pyrogram.types import CallbackQuery, InlineKeyboardMarkup
-import asyncio
+from pyrogram.enums import ChatMemberStatus as CMS
 import config
-from nexichat import LOGGER
-from nexichat import db
+from nexichat import mongo, db, LOGGER
 
-translator = GoogleTranslator()  
+# MongoDB connection setup
+client_db = MongoClient(config.MONGO_URL)
+chatai = client_db["Word"]["WordDb"]
+vick_db = client_db["VickDb"]["Vick"]
+status_db = client_db["StatusDb"]["ChatStatus"]  # Chat status collection
 
-lang_db = db.ChatLangDb.LangCollection
-status_db = db.chatbot_status_db.status
+# Handle the /chatbot command to enable or disable the chatbot
+@Client.on_message(filters.command("chatbot"))
+async def chatbot_command(client: Client, message: Message):
+    """Handle /chatbot command to enable/disable chatbot."""
+    if len(message.command) > 1:
+        command = message.command[1].lower()  # Get the second part of the command
+    else:
+        command = ''
 
-replies_cache = []
-new_replies_cache = []
-
-cblocklist = {}
-message_counts = {}
-
-
-async def get_chat_language(chat_id):
- 
-    chat_lang = await lang_db.find_one({"chat_id": chat_id})
-    return chat_lang["language"] if chat_lang and "language" in chat_lang else "en"
-    
-
-
+    chat_id = message.chat.id
+    if command == "on":
+        # Enable the chatbot for the chat
+        status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "enabled"}}, upsert=True)
         
-@Client.on_message(filters.incoming)
+        # Send confirmation message
+        await message.reply_text(
+            f"Cʜᴀᴛ: ➥ {message.chat.title}\nCʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴇɴᴀʙʟᴇᴅ.**"
+        )
+        
+    elif command == "off":
+        # Disable the chatbot for the chat
+        status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "disabled"}}, upsert=True)
+
+        # Send confirmation message
+        await message.reply_text(
+            f"Cʜᴀᴛ: ➥{message.chat.title}\n**Cʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ.**"
+        )
+        
+    else:
+        # If no valid command is provided, show a help message
+        await message.reply_text(
+            "Usᴇs:⤸⤸⤸\n/chatbot on - ᴛᴏ ᴇɴᴀʙʟᴇ ᴛʜᴇ ᴄʜᴀᴛʙᴏᴛ\n/chatbot off - ᴛᴏ ᴅɪsᴀʙʟᴇ ᴛʜᴇ ᴄʜᴀᴛʙᴏᴛ"
+        )
+
+# Handle /status command to check the chatbot status in private chats
+@Client.on_message(filters.command("status") & filters.private)
+async def status_command(client: Client, message: Message):
+    """Handle /status command to show chatbot status in private chat."""
+    user_id = message.from_user.id
+    chat_status = status_db.find_one({"chat_id": user_id})
+
+    if chat_status and chat_status.get("status") == "enabled":
+        await message.reply_text("ᴄʜᴀᴛʙᴏᴛ : ᴇɴᴀʙʟᴇ")
+    else:
+        await message.reply_text("ᴄʜᴀᴛʙᴏᴛ : ᴅɪsᴀʙʟᴇ")
+
+# Helper function to check unwanted messages
+def is_unwanted_message(message: Message) -> bool:
+    return message.text.startswith(("!", "/", "?", "@", "#"))
+
+# Handle chat messages for text or stickers in group chats (when the chatbot is enabled)
+@Client.on_message((filters.text | filters.sticker | filters.group) & ~filters.private & ~filters.bot)
 async def chatbot_response(client: Client, message: Message):
-    global cblocklist, message_counts
     try:
-        bot_user = await client.get_me()
-        bot_user_id = bot_user.id
-
-        user_id = message.from_user.id
-        chat_id = message.chat.id
-        current_time = datetime.now()
-
-        if message.chat.type == "private":
-            cblocklist = {uid: time for uid, time in cblocklist.items() if time > current_time}
-
-            if user_id in cblocklist:
-                return
-
-            if user_id not in message_counts:
-                message_counts[user_id] = {"count": 1, "last_time": current_time}
-            else:
-                time_diff = (current_time - message_counts[user_id]["last_time"]).total_seconds()
-                if time_diff <= 3:
-                    message_counts[user_id]["count"] += 1
-                else:
-                    message_counts[user_id] = {"count": 1, "last_time": current_time}
-
-                if message_counts[user_id]["count"] >= 4:
-                    cblocklist[user_id] = current_time + timedelta(minutes=1)
-                    message_counts.pop(user_id, None)
-                    await message.reply_text(f"**Hey, {message.from_user.mention}**\n\n**You are blocked for 1 minute due to spam messages.**\n**Try again after 1 minute 🤣.**")
-                    return
-        chat_id = message.chat.id
-        chat_status = await status_db.find_one({"chat_id": chat_id})
-
+        if is_unwanted_message(message):
+            return
+        
+        # Check if the chatbot is enabled for the group
+        chat_status = status_db.find_one({"chat_id": message.chat.id})
         if chat_status and chat_status.get("status") == "disabled":
+            # If the chatbot is disabled, do not respond
             return
 
-        if message.text and any(message.text.startswith(prefix) for prefix in ["!", "/", ".", "?", "@", "#"]):
-            if message.chat.type == "group" or message.chat.type == "supergroup":
-                return await add_served_chat(message.chat.id)
-            else:
-                return await add_served_user(message.chat.id)
-
-      
-        if (message.reply_to_message and message.reply_to_message.from_user.id == bot_user_id) or not message.reply_to_message:
-            
-            reply_data = await get_reply(message.text)
-
-            if reply_data:
-                response_text = reply_data["text"]
-                chat_lang = await get_chat_language(chat_id)
-
-                if not chat_lang or chat_lang == "nolang":
-                    translated_text = response_text
-                else:
-                    translated_text = GoogleTranslator(source='auto', target=chat_lang).translate(response_text)
-                
-                if reply_data["check"] == "sticker":
-                    await message.reply_sticker(reply_data["text"])
-                elif reply_data["check"] == "photo":
-                    await message.reply_photo(reply_data["text"])
-                elif reply_data["check"] == "video":
-                    await message.reply_video(reply_data["text"])
-                elif reply_data["check"] == "audio":
-                    await message.reply_audio(reply_data["text"])
-                elif reply_data["check"] == "voice":
-                    await message.reply_voice(reply_data["text"])
-                elif reply_data["check"] == "gif":
-                    await message.reply_animation(reply_data["text"]) 
-                else:
-                    await message.reply_text(translated_text)
-                    await client.send_chat_action(message.chat.id, ChatAction.TYPING)
-            else:
-                await message.reply_text("**I don't understand. what are you saying??**")
-        
-        if message.reply_to_message:
-            await save_reply(message.reply_to_message, message)
-    except MessageEmpty as e:
-        print(f"err{e}")
-        return await message.reply_text("🙄🙄")
+        word = message.text if message.text else message.sticker.file_unique_id
+        await handle_chatbot_response(client, message, word)
     except Exception as e:
-        return
+        LOGGER.error(f"Error in chatbot_response: {e}")
 
-
-async def reload_cache():
-    global replies_cache
+# Private chat response (handling private messages)
+@Client.on_message((filters.text | filters.sticker) & filters.private & ~filters.bot)
+async def vickprivate(client: Client, message: Message):
     try:
-        replies_cache = await chatai.find().to_list(length=None)
-        
-    except Exception as e:
-        print(f"Error in reload_cache: {e}")
+        # Check if the chatbot is enabled for the user
+        user_status = status_db.find_one({"chat_id": message.from_user.id})
+        if user_status and user_status.get("status") == "disabled":
+            return
 
-async def get_reply(word: str):
+        word = message.text if message.text else message.sticker.file_unique_id
+        await handle_chatbot_response(client, message, word)
+    except Exception as e:
+        LOGGER.error(f"Error in vickprivate: {e}")
+
+# Helper function to handle chatbot responses (reply with text or sticker)
+async def handle_chatbot_response(client: Client, message: Message, word: str):
     try:
-        is_chat = [reply for reply in replies_cache if reply.get("word") == word]
+        # If no reply is present in the message
+        if not message.reply_to_message:
+            is_vick = vick_db.find_one({"chat_id": message.chat.id})
+            if not is_vick:
+                await client.send_chat_action(message.chat.id, ChatAction.TYPING)
+                K = [x["text"] for x in chatai.find({"word": word})]
+                if K:
+                    hey = random.choice(K)
+                    is_text = chatai.find_one({"text": hey})
+                    if is_text["check"] == "sticker":
+                        await message.reply_sticker(hey)
+                    else:
+                        await message.reply_text(hey)
 
-        if not is_chat:
-            await reload_cache()
-            is_chat = [reply for reply in replies_cache if reply.get("word") == word]
-         
-        if not is_chat:
-            return random.choice(replies_cache) if replies_cache else None
-        
-        return random.choice(is_chat)
+        # Handle reply messages
+        elif message.reply_to_message:
+            is_vick = vick_db.find_one({"chat_id": message.chat.id})
+
+            if message.reply_to_message.from_user.id == client.id and not is_vick:
+                await client.send_chat_action(message.chat.id, ChatAction.TYPING)
+                K = [x["text"] for x in chatai.find({"word": word})]
+                if K:
+                    hey = random.choice(K)
+                    is_text = chatai.find_one({"text": hey})
+                    if is_text["check"] == "sticker":
+                        await message.reply_sticker(hey)
+                    else:
+                        await message.reply_text(hey)
+
+            if message.reply_to_message.from_user.id != client.id:
+                # Insert new word-text pair if not found
+                if message.text:
+                    is_chat = chatai.find_one({"word": message.reply_to_message.text, "text": message.text})
+                    if not is_chat:
+                        chatai.insert_one({"word": message.reply_to_message.text, "text": message.text, "check": "none"})
+                if message.sticker:
+                    is_chat = chatai.find_one({"word": message.reply_to_message.text, "id": message.sticker.file_unique_id})
+                    if not is_chat:
+                        chatai.insert_one({"word": message.reply_to_message.text, "text": message.sticker.file_id, "check": "sticker", "id": message.sticker.file_unique_id})
+
     except Exception as e:
-        print(f"Error in get_reply: {e}")
-        return None
-     
-async def save_reply(original_message: Message, reply_message: Message):
-    try:
-        new_reply = None
-
-        if reply_message.sticker:
-            new_reply = {
-                "word": original_message.text,
-                "text": reply_message.sticker.file_id,
-                "check": "sticker",
-            }
-
-        elif reply_message.photo:
-            new_reply = {
-                "word": original_message.text,
-                "text": reply_message.photo.file_id,
-                "check": "photo",
-            }
-
-        elif reply_message.video:
-            new_reply = {
-                "word": original_message.text,
-                "text": reply_message.video.file_id,
-                "check": "video",
-            }
-
-        elif reply_message.audio:
-            new_reply = {
-                "word": original_message.text,
-                "text": reply_message.audio.file_id,
-                "check": "audio",
-            }
-
-        elif reply_message.voice:
-            new_reply = {
-                "word": original_message.text,
-                "text": reply_message.voice.file_id,
-                "check": "voice",
-            }
-
-        elif reply_message.animation:
-            new_reply = {
-                "word": original_message.text,
-                "text": reply_message.animation.file_id,
-                "check": "gif",
-            }
-
-        elif reply_message.text:
-            translated_text = reply_message.text
-            try:
-                translated_text = GoogleTranslator(source='auto', target='en').translate(reply_message.text)
-            except Exception as e:
-                print(f"Translation error: {e}, saving original text.")
-                translated_text = reply_message.text
-
-            new_reply = {
-                "word": original_message.text,
-                "text": translated_text,
-                "check": "none",
-            }
-
-        
-        if new_reply:
-            is_chat = await chatai.find_one(new_reply)
-            if not is_chat:
-                await chatai.insert_one(new_reply)
-                replies_cache.append(new_reply)  
-                print(f"New Replies saved: {original_message.text} == {reply_message.text}")
-                
-    except Exception as e:
-        print(f"Error in save_reply: {e}")
+        LOGGER.error(f"Error in handle_chatbot_response: {e}")
