@@ -39,10 +39,3 @@ async def status_command(client: Client, message: Message):
         await message.reply(f"Chatbot status for this chat: **{current_status}**")
     else:
         await message.reply("No status found for this chat.")
-
-
-@nexichat.on_message(filters.command(["resetlang", "nolang"]))
-async def reset_language(client: Client, message: Message):
-    chat_id = message.chat.id
-    lang_db.update_one({"chat_id": chat_id}, {"$set": {"language": "nolang"}}, upsert=True)
-    await message.reply_text("**Bot language has been reset in this chat to mix language.**")
