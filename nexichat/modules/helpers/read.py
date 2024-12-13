@@ -6,7 +6,6 @@ from pyrogram import Client, filters
 
 START = """```
 🐰⃟⃞⍣Rᴀᴅʜɪᴋᴀ❥ Oɴ ᴛᴏᴘ ❥```
-➥ ᴍᴜʟᴛɪ-ʟᴀɴɢᴜᴀɢᴇ /lang
 ➥ ᴇɴᴀʙʟᴇᴅ/ᴅɪꜱᴀʙʟᴇᴅ ʙʏ /chatbot
 ➥ ᴄʟᴏɴᴇ ʙʏ /clone
 ╔═════════════════╗
@@ -36,10 +35,6 @@ TOOLS_DATA_READ = f"""```
 CHATBOT_READ = f"""```
 : ̗̀➛ ʜᴇʀᴇ ᴀʀᴇ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅs ғᴏʀ ᴄʜᴀᴛʙᴏᴛ:```
 彡 /chatbot - Eɴᴀʙʟᴇ ᴏʀ ᴅɪsᴀʙʟᴇ ᴛʜᴇ ᴄʜᴀᴛʙᴏᴛ.
-──────────────
-彡 /lang, /language, /setlang - Oᴘᴇɴs ʟᴀɴɢᴜᴀɢᴇ.  
-──────────────
-彡 /resetlang, /nolang - Rᴇsᴇᴛs ᴛʜᴇ ʙᴏᴛ's ʟᴀɴɢᴜᴀɢᴇ.
 ──────────────
 彡 /status - Cʜᴇᴄᴋ ᴄʜᴀᴛʙᴏᴛ sᴛᴀᴛᴜs.
 ──────────────
