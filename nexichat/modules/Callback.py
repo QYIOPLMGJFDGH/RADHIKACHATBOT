@@ -37,6 +37,12 @@ from nexichat.modules.helpers import (
 lang_db = db.ChatLangDb.LangCollection
 status_db = db.chatbot_status_db.status
 
+users = len(await get_served_users())
+chats = len(await get_served_chats())
+UP, CPU, RAM, DISK = await bot_sys_stats()
+
+# Format the START text by filling the placeholders with dynamic data
+START_TEXT = START.format(users, chats, UP)
 
 @nexichat.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
@@ -114,9 +120,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
     elif query.data == "HOME_BACK":
-        await query.message.edit(
-            text=START,
-            reply_markup=InlineKeyboardMarkup(START_BOT),
+    await query.message.edit(
+        text=START_TEXT,
+        reply_markup=InlineKeyboardMarkup(START_BOT),
         )
 
     # Enable chatbot for the chat
