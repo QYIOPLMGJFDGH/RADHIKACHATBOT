@@ -30,27 +30,9 @@ from nexichat.mplugin.helpers import (
 )
 
 GSTART = """**ʜᴇʏ ᴅᴇᴀʀ {}**\n\n**ᴛʜᴀɴᴋs ғᴏʀ sᴛᴀʀᴛ ᴍᴇ ɪɴ ɢʀᴏᴜᴘ ʏᴏᴜ ᴄᴀɴ ᴄʜᴀɴɢᴇ ʟᴀɴɢᴜᴀɢᴇ ʙʏ ᴄʟɪᴄᴋ ᴏɴ ɢɪᴠᴇɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴs.**\n**ᴄʟɪᴄᴋ ᴀɴᴅ sᴇʟᴇᴄᴛ ʏᴏᴜʀ ғᴀᴠᴏᴜʀɪᴛᴇ ʟᴀɴɢᴜᴀɢᴇ ᴛᴏ sᴇᴛ ᴄʜᴀᴛ ʟᴀɴɢᴜᴀɢᴇ ғᴏʀ ʙᴏᴛ ʀᴇᴘʟʏ.**\n\n**ᴛʜᴀɴᴋ ʏᴏᴜ ᴘʟᴇᴀsᴇ ᴇɴɪᴏʏ.**"""
-STICKER = [
-    "CAACAgUAAx0CYlaJawABBy4vZaieO6T-Ayg3mD-JP-f0yxJngIkAAv0JAALVS_FWQY7kbQSaI-geBA",
-    "CAACAgUAAx0CYlaJawABBy4rZaid77Tf70SV_CfjmbMgdJyVD8sAApwLAALGXCFXmCx8ZC5nlfQeBA",
-    "CAACAgUAAx0CYlaJawABBy4jZaidvIXNPYnpAjNnKgzaHmh3cvoAAiwIAAIda2lVNdNI2QABHuVVHgQ",
-]
 
 
-EMOJIOS = [
-    "💣",
-    "💥",
-    "🪄",
-    "🧨",
-    "⚡",
-    "🤡",
-    "👻",
-    "🎃",
-    "🎩",
-    "🕊",
-]
-
-BOT = "https://envs.sh/IL_.jpg"
+BOT = "https://files.catbox.moe/hwqq2e.jpg"
 IMG = [
     "https://graph.org/file/210751796ff48991b86a3.jpg",
     "https://graph.org/file/7b4924be4179f70abcf33.jpg",
@@ -249,44 +231,64 @@ async def ls(client: Client, m: Message):
 
 @Client.on_message(filters.command(["start", "aistart"]))
 async def start(client: Client, m: Message):
+    # Get number of users and chats
     users = len(await get_served_users())
     chats = len(await get_served_chats())
+
     if m.chat.type == ChatType.PRIVATE:
-        accha = await m.reply_text(
-            text=random.choice(EMOJIOS),
-        )
+        # Send the progress bar message
+        baby = await m.reply_text(f"**▒▒▒▒▒▒▒▒▒▒ 0%**")
         
-        animation_steps = [
-            "ᴅ", "ᴅι", "ᴅιи", "ᴅιиg", "ᴅιиg ᴅ", "ᴅιиg ᴅσ", "ᴅιиg ᴅσи", "ᴅιиg ᴅσиg", "ᴅιиg ᴅσиg ꨄ︎", "sᴛαят"
-        ]
-
-        for step in animation_steps:
-            await accha.edit(f"**__{step}__**")
-            await asyncio.sleep(0.01)
-
-        await accha.delete()
+        # Simulate progress updates with progress bar
+        await baby.edit_text(f"**█▒▒▒▒▒▒▒▒▒ 10%**")
+        await asyncio.sleep(0.5)
+        await baby.edit_text(f"**██▒▒▒▒▒▒▒▒ 20%**")
+        await asyncio.sleep(0.5)
+        await baby.edit_text(f"**███▒▒▒▒▒▒▒ 30%**")
+        await asyncio.sleep(0.5)
+        await baby.edit_text(f"**████▒▒▒▒▒▒ 40%**")
+        await asyncio.sleep(0.5)
+        await baby.edit_text(f"**█████▒▒▒▒▒ 50%**")
+        await asyncio.sleep(0.5)
+        await baby.edit_text(f"**██████▒▒▒▒ 60%**")
+        await asyncio.sleep(0.5)
+        await baby.edit_text(f"**███████▒▒▒ 70%**")
+        await asyncio.sleep(0.5)
+        await baby.edit_text(f"**████████▒▒ 80%**")
+        await asyncio.sleep(0.5)
+        await baby.edit_text(f"**█████████▒ 90%**")
+        await asyncio.sleep(0.5)
+        await baby.edit_text(f"**██████████ 100%**")
+        await asyncio.sleep(0.5)
         
-        umm = await m.reply_sticker(sticker=random.choice(STICKER))
-        chat_photo = BOT  
-        if m.chat.photo:
-            try:
-                userss_photo = await client.download_media(m.chat.photo.big_file_id)
-                await umm.delete()
-                if userss_photo:
-                    chat_photo = userss_photo
-            except AttributeError:
-                chat_photo = BOT  
+        # After reaching 100%, notify the user and delete the progress message
+        await baby.edit_text(f"**❖ ɴᴏᴡ sᴛᴀʀᴛᴇᴅ..**")
+        await asyncio.sleep(0.5)
+        await baby.delete()
 
+        # Set default photo (BOT) in case of no user photo
+        chat_photo = BOT  # Default photo is set to your bot's image
+
+        # Send the bot's stats to the user
         users = len(await get_served_users())
         chats = len(await get_served_chats())
         UP, CPU, RAM, DISK = await bot_sys_stats()
-        await m.reply_photo(photo=chat_photo, caption=START.format(users, chats, UP), reply_markup=InlineKeyboardMarkup(START_BOT))
-        
+
+        await m.reply_photo(
+            photo=chat_photo,
+            caption=START.format(users, chats, UP),
+            reply_markup=InlineKeyboardMarkup(START_BOT)
+        )
+
+        # Log the user interaction
         await add_served_user(m.chat.id)
+
+        # Create a keyboard to mention the user
         keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(f"{m.chat.first_name}", user_id=m.chat.id)]])
 
+        # Notify the owner about the new user interaction
         bot_id = client.me.id
-        owner_id = CLONE_OWNERS.get(bot_id) 
+        owner_id = CLONE_OWNERS.get(bot_id)
         if owner_id:
             await client.send_photo(
                 int(owner_id),
@@ -296,27 +298,11 @@ async def start(client: Client, m: Message):
             )
         
     else:
+        # Handle the case for groups/chats other than private chats
         await m.reply_photo(
             photo=random.choice(IMG),
             caption=GSTART.format(m.from_user.mention or "can't mention"),
             reply_markup=InlineKeyboardMarkup(HELP_START),
-        )
-        await add_served_chat(m.chat.id)
-
-@Client.on_message(filters.command("help"))
-async def help(client: Client, m: Message):
-    if m.chat.type == ChatType.PRIVATE:
-        hmm = await m.reply_photo(
-            photo=random.choice(IMG),
-            caption=HELP_READ,
-            reply_markup=InlineKeyboardMarkup(HELP_BTN),
-        )
-
-    else:
-        await m.reply_photo(
-            photo=random.choice(IMG),
-            caption="**ʜᴇʏ, ᴘᴍ ᴍᴇ ғᴏʀ ʜᴇʟᴘ ᴄᴏᴍᴍᴀɴᴅs!**",
-            reply_markup=InlineKeyboardMarkup(HELP_BUTN),
         )
         await add_served_chat(m.chat.id)
 
