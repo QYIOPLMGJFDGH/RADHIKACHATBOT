@@ -126,19 +126,3 @@ HELP_BUTN = [
         InlineKeyboardButton(text="➥ ᴏᴘᴇɴ ɪɴ ᴘʀɪᴠɪᴛᴇ", url="https://t.me/RADHIKA_CHAT_RROBOT?start=help"),
     ],
 ]
-
-
-ABOUT_BTN = [
-    [
-        InlineKeyboardButton(text="🎄 sᴜᴘᴘᴏʀᴛ 🎄", url=f"https://t.me/{SUPPORT_GRP}"),
-        InlineKeyboardButton(text="« ʜᴇʟᴘ »", callback_data="HELP"),
-    ],
-    [
-        InlineKeyboardButton(text="🍾 ᴏᴡɴᴇʀ 🍾", user_id=OWNER),
-        #   InlineKeyboardButton(text="❄️ sᴏᴜʀᴄᴇ ❄️", callback_data="SOURCE"),
-    ],
-    [
-        InlineKeyboardButton(text="🐳 ᴜᴘᴅᴀᴛᴇs 🐳", url=f"https://t.me/{UPDATE_CHNL}"),
-        InlineKeyboardButton(text="⦿ ʙᴀᴄᴋ ⦿", callback_data="BACK"),
-    ],
-]
