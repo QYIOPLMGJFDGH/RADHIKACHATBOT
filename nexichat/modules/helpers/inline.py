@@ -67,13 +67,6 @@ CLOSE_BTN = [
 ]
 
 
-CHATBOT_ON = [
-    [
-        InlineKeyboardButton(text="ᴇɴᴀʙʟᴇ", callback_data="enable_chatbot"),
-        InlineKeyboardButton(text="ᴅɪsᴀʙʟᴇ", callback_data="disable_chatbot"),
-    ],
-]
-
 
 MUSIC_BACK_BTN = [
     [
