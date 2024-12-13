@@ -33,20 +33,23 @@ from nexichat.modules.helpers import (
     languages,
 )
 
-
 lang_db = db.ChatLangDb.LangCollection
 status_db = db.chatbot_status_db.status
 
+# Fetch dynamic START_TEXT
 async def fetch_data():
     users = len(await get_served_users())
     chats = len(await get_served_chats())
-    UP, CPU, RAM, DISK = await bot_sys_stats()
+    UP, CPU, RAM, DISK = await bot_sys_stats()  # Assuming bot_sys_stats is defined elsewhere
     START_TEXT = START.format(users, chats, UP)  # Format the START text with dynamic data
     return START_TEXT
 
 @nexichat.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     LOGGER.info(query.data)
+
+    # Fetch START_TEXT dynamically
+    START_TEXT = await fetch_data()
 
     # Help menu
     if query.data == "HELP":
@@ -64,7 +67,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     # Go back to the main menu
     elif query.data == "BACK":
         await query.message.edit(
-            text=START,
+            text=START_TEXT,  # Use the dynamically fetched START_TEXT
             reply_markup=InlineKeyboardMarkup(DEV_OP),
         )
 
@@ -121,7 +124,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "HOME_BACK":
         await query.message.edit(
-            text=START_TEXT,
+            text=START_TEXT,  # Use the dynamically fetched START_TEXT
             reply_markup=InlineKeyboardMarkup(START_BOT),
         )
 
