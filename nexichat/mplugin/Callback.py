@@ -26,7 +26,6 @@ from nexichat.mplugin.helpers import (
     HELP_BTN,
     HELP_READ,
     MUSIC_BACK_BTN,
-    SOURCE_READ,
     START,
     TOOLS_DATA_READ,
     languages,
@@ -61,13 +60,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=InlineKeyboardMarkup(DEV_OP),
         )
 
-    # Show source information
-    elif query.data == "SOURCE":
-        await query.message.edit(
-            text=SOURCE_READ,
-            reply_markup=InlineKeyboardMarkup(BACK),
-            disable_web_page_preview=True,
-        )
 
     # Show about information
     elif query.data == "ABOUT":
