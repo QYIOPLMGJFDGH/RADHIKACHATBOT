@@ -11,7 +11,7 @@ from nexichat.database.chats import add_served_chat
 from nexichat.database.users import add_served_user
 from config import MONGO_URL
 from nexichat import nexichat, mongo, LOGGER, db
-from nexichat.modules.helpers import chatai, storeai, languages, CHATBOT_ON
+from nexichat.modules.helpers import chatai, storeai, languages
 from nexichat.modules.helpers import (
     ADMIN_READ,
     BACK,
