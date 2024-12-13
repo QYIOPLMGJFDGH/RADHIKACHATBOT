@@ -35,8 +35,7 @@ async def chatbot_command(client: Client, message: Message):
         reply_markup=InlineKeyboardMarkup(CHATBOT_ON),
     )
 
-# Handle the callback query for enabling/disabling the chatbot
-# Handle the callback query for enabling/disabling the chatbot
+
 @nexichat.on_callback_query(filters.regex("enable_chatbot|disable_chatbot"))
 async def toggle_chatbot(client: Client, query: CallbackQuery):
     """Handle callback queries for enabling/disabling the chatbot."""
@@ -52,8 +51,8 @@ async def toggle_chatbot(client: Client, query: CallbackQuery):
             # Send pop-up confirmation
             await query.answer("Cʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇ ✅", show_alert=True)
 
-            # Send a new message with the status update (instead of editing the existing one)
-            await query.message.reply_text(
+            # Edit the original message with the status update
+            await query.message.edit_text(
                 f"Chat: {query.message.chat.title}\n**ᴄʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴇɴᴀʙʟᴇᴅ.**"
             )
 
@@ -64,13 +63,13 @@ async def toggle_chatbot(client: Client, query: CallbackQuery):
             # Send pop-up confirmation
             await query.answer("ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇ ✅", show_alert=True)
 
-            # Send a new message with the status update (instead of editing the existing one)
-            await query.message.reply_text(
+            # Edit the original message with the status update
+            await query.message.edit_text(
                 f"Chat: {query.message.chat.title}\n**ᴄʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ.**"
             )
 
-        # Delete the original message (the one with the inline buttons)
-        await query.message.delete()
+        # Optionally delete the inline button message after the update
+        # await query.message.delete()
 
     except Exception as e:
         LOGGER.error(f"Error handling callback query: {e}")
