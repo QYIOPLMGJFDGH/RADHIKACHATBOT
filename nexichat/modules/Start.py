@@ -1,9 +1,13 @@
 import asyncio
 import logging
-import random
 import time
+from pathlib import Path
+import os
+import time
+import io
 import psutil
 import config
+from nexichat import db
 from nexichat import _boot_
 from nexichat import get_readable_time
 from nexichat import nexichat, mongo
@@ -30,34 +34,12 @@ from nexichat.modules.helpers import (
 )
 
 GSTART = """**ʜᴇʏ ᴅᴇᴀʀ {}**\n\n**ᴛʜᴀɴᴋs ғᴏʀ sᴛᴀʀᴛ ᴍᴇ ɪɴ ɢʀᴏᴜᴘ ʏᴏᴜ ᴄᴀɴ ᴄʜᴀɴɢᴇ ʟᴀɴɢᴜᴀɢᴇ ʙʏ ᴄʟɪᴄᴋ ᴏɴ ɢɪᴠᴇɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴs.**\n**ᴄʟɪᴄᴋ ᴀɴᴅ sᴇʟᴇᴄᴛ ʏᴏᴜʀ ғᴀᴠᴏᴜʀɪᴛᴇ ʟᴀɴɢᴜᴀɢᴇ ᴛᴏ sᴇᴛ ᴄʜᴀᴛ ʟᴀɴɢᴜᴀɢᴇ ғᴏʀ ʙᴏᴛ ʀᴇᴘʟʏ.**\n\n**ᴛʜᴀɴᴋ ʏᴏᴜ ᴘʟᴇᴀsᴇ ᴇɴɪᴏʏ.**"""
-
 BOT = "https://files.catbox.moe/kb3gl1.jpg"
-IMG = [
-    "https://graph.org/file/210751796ff48991b86a3.jpg",
-    "https://graph.org/file/7b4924be4179f70abcf33.jpg",
-    "https://graph.org/file/f6d8e64246bddc26b4f66.jpg",
-    "https://graph.org/file/63d3ec1ca2c965d6ef210.jpg",
-    "https://graph.org/file/9f12dc2a668d40875deb5.jpg",
-    "https://graph.org/file/0f89cd8d55fd9bb5130e1.jpg",
-    "https://graph.org/file/e5eb7673737ada9679b47.jpg",
-    "https://graph.org/file/2e4dfe1fa5185c7ff1bfd.jpg",
-    "https://graph.org/file/36af423228372b8899f20.jpg",
-    "https://graph.org/file/c698fa9b221772c2a4f3a.jpg",
-    "https://graph.org/file/61b08f41855afd9bed0ab.jpg",
-    "https://graph.org/file/744b1a83aac76cb3779eb.jpg",
-    "https://graph.org/file/814cd9a25dd78480d0ce1.jpg",
-    "https://graph.org/file/e8b472bcfa6680f6c6a5d.jpg",
-]
 
-
-
-from nexichat import db
 
 chatai = db.Word.WordDb
 lang_db = db.ChatLangDb.LangCollection
 status_db = db.ChatBotStatusDb.StatusCollection
-
-
 
 
 async def bot_sys_stats():
@@ -119,7 +101,7 @@ async def welcomejej(client, message: Message):
             if member.id == nexichat.id:
                 try:
                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(f"sᴇʟᴇᴄᴛ ʟᴀɴɢᴜᴀɢᴇ", callback_data="choose_lang")]])    
-                    await message.reply_photo(photo=random.choice(IMG), caption=START.format(nexichat.mention or "can't mention", users, chats), reply_markup=reply_markup)
+                    await message.reply_photo(photo=BOT, caption=START.format(nexichat.mention or "can't mention", users, chats), reply_markup=reply_markup)
                     chat = message.chat
                     await set_group_language(chat)
                 except Exception as e:
@@ -140,7 +122,7 @@ async def welcomejej(client, message: Message):
                         groups_photo if groups_photo else "https://envs.sh/IL_.jpg"
                     )
                 except AttributeError:
-                    chat_photo = "https://envs.sh/IL_.jpg"
+                    chat_photo = "https://files.catbox.moe/hgi277.jpg"
                 except Exception as e:
                     pass
 
@@ -148,7 +130,7 @@ async def welcomejej(client, message: Message):
                 chats = len(await get_served_chats())
                 username = chat.username if chat.username else "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏᴜᴘ"
                 msg = (
-                    f"**📝𝐌ᴜsɪᴄ 𝐁ᴏᴛ 𝐀ᴅᴅᴇᴅ 𝐈ɴ 𝐀 #𝐍ᴇᴡ_𝐆ʀᴏᴜᴘ**\n\n"
+                    f"**🐰⃟⃞⍣Rᴀᴅʜɪᴋᴀ❥ 𝐀ᴅᴅᴇᴅ 𝐈ɴ 𝐀 #𝐍ᴇᴡ_𝐆ʀᴏᴜᴘ**\n\n"
                     f"**📌𝐂ʜᴀᴛ 𝐍ᴀᴍᴇ:** {chat.title}\n"
                     f"**🍂𝐂ʜᴀᴛ 𝐈ᴅ:** `{chat.id}`\n"
                     f"**🔐𝐂ʜᴀᴛ 𝐔sᴇʀɴᴀᴍᴇ:** @{username}\n"
@@ -178,11 +160,6 @@ async def welcomejej(client, message: Message):
     except Exception as e:
         print(f"Err: {e}")
 
-
-from pathlib import Path
-import os
-import time
-import io
 
 @nexichat.on_cmd(["ls"])
 async def ls(_, m: Message):
