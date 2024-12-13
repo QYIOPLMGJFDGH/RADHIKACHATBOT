@@ -3,11 +3,14 @@ from pymongo import MongoClient
 from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
 from pyrogram.enums import ChatAction
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
-from pyrogram import Client
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import CallbackQuery, InlineKeyboardMarkup
+from pyrogram.enums import ChatMemberStatus as CMS
 import asyncio
 import config
-from nexichat import nexichat, LOGGER, shizuchat
+from nexichat import nexichat
+from nexichat import mongo, db, LOGGER, nexichat as shizuchat
+
 
 # Single MongoDB connection instance
 client_db = MongoClient(config.MONGO_URL)
