@@ -112,6 +112,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=InlineKeyboardMarkup(HELP_BTN),
         )
 
+    elif query.data == "HOME_BACK":
+        await query.message.edit(
+            text=START,
+            reply_markup=InlineKeyboardMarkup(START_BOT),
+        )
+
     # Enable chatbot for the chat
     elif query.data == "enable_chatbot":
         chat_id = query.message.chat.id
