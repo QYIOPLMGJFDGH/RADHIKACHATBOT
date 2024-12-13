@@ -5,7 +5,7 @@ from pyrogram import Client, filters
 
 
 START = """```
-[🐰⃟⃞⍣Rᴀᴅʜɪᴋᴀ❥](https://t.me/RADHIKA_CHAT_RROBOT) Cʟᴏɴᴇᦔ ❥```
+🐰⃟⃞⍣Rᴀᴅʜɪᴋᴀ❥ Cʟᴏɴᴇᦔ Bᴏᴛ ❥```
 ➥ ᴍᴜʟᴛɪ-ʟᴀɴɢᴜᴀɢᴇ /lang
 ➥ ᴇɴᴀʙʟᴇᴅ/ᴅɪꜱᴀʙʟᴇᴅ ʙʏ /chatbot
 ➥ ᴄʟᴏɴᴇ ʙʏ /clone
