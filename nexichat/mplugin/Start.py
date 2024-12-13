@@ -69,37 +69,53 @@ async def welcomejej(client, message: Message):
     chat = message.chat
     await add_served_chat(message.chat.id)
     await set_default_status(message.chat.id)
+    
     users = len(await get_served_users())
     chats = len(await get_served_chats())
+    
     try:
         for member in message.new_chat_members:
-            if member.id == (await client.get_me()).id:
+            bot_info = await client.get_me()
+            
+            # Ensure bot_info is not None before accessing .id
+            if bot_info and member.id == bot_info.id:
                 try:
                     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("sᴇʟᴇᴄᴛ ʟᴀɴɢᴜᴀɢᴇ", callback_data="choose_lang")]])    
                     await message.reply_text(text=START.format(users, chats), reply_markup=reply_markup)
                 except Exception as e:
                     print(f"{e}")
                     pass
-                try:
-                    invitelink = await client.export_chat_invite_link(message.chat.id)
-                    link = f"[ɢᴇᴛ ʟɪɴᴋ]({invitelink})"
-                except ChatAdminRequired:
-                    link = "No Link"
                 
                 try:
-                    groups_photo = await client.download_media(
-                        chat.photo.big_file_id, file_name=f"chatpp{chat.id}.png"
-                    )
-                    chat_photo = (
-                        groups_photo if groups_photo else "https://envs.sh/IL_.jpg"
-                    )
-                except AttributeError:
-                    chat_photo = "https://envs.sh/IL_.jpg"
+                    # Try exporting chat invite link and handle the case where it may not be available
+                    try:
+                        invitelink = await client.export_chat_invite_link(message.chat.id)
+                        link = f"[ɢᴇᴛ ʟɪɴᴋ]({invitelink})"
+                    except ChatAdminRequired:
+                        link = "No Link"
+                    except Exception as e:
+                        print(f"Error generating invite link: {e}")
+                        link = "No Link"
                 except Exception as e:
-                    pass
+                    print(f"Error getting invite link: {e}")
+                    link = "No Link"
+                
+                # Handle chat photo download with appropriate checks
+                try:
+                    if chat.photo and chat.photo.big_file_id:
+                        groups_photo = await client.download_media(
+                            chat.photo.big_file_id, file_name=f"chatpp{chat.id}.png"
+                        )
+                        chat_photo = groups_photo if groups_photo else "https://envs.sh/IL_.jpg"
+                    else:
+                        chat_photo = "https://envs.sh/IL_.jpg"
+                except Exception as e:
+                    print(f"Error downloading group photo: {e}")
+                    chat_photo = "https://envs.sh/IL_.jpg"
 
+                # Prepare group info message
                 count = await client.get_chat_members_count(chat.id)
-                username = chat.username if chat.username else "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏᴜᴘ"
+                username = chat.username if chat.username else "𝐏ʀɪᴠᴀᴛᴇ 𝐆ʀᴏᴜᴩ"
                 msg = (
                     f"**📝𝐁ᴏᴛ 𝐀ᴅᴅᴇᴅ 𝐈ɴ 𝐀 #𝐍ᴇᴡ_𝐆ʀᴏᴜᴘ**\n\n"
                     f"**📌𝐂ʜᴀᴛ 𝐍ᴀᴍᴇ:** {chat.title}\n"
@@ -111,12 +127,13 @@ async def welcomejej(client, message: Message):
                     f"**ᴛᴏᴛᴀʟ ᴄʜᴀᴛs :** {chats}"
                 )
 
+                # Send the group info to the bot owner using send_message
                 try:
                     bot_id = client.me.id
                     owner_id = CLONE_OWNERS.get(bot_id)
                     
                     if owner_id:
-                        await client.send_text(
+                        await client.send_message(
                             int(owner_id),
                             text=msg,
                             reply_markup=InlineKeyboardMarkup(
@@ -124,9 +141,10 @@ async def welcomejej(client, message: Message):
                             )
                         )
                 except Exception as e:
-                    print(f"Err: {e}")
+                    print(f"Err sending message to owner: {e}")
+                    
     except Exception as e:
-        print(f"Err: {e}")
+        print(f"Error in welcomejej: {e}")
 
 
 
