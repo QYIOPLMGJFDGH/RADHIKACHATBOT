@@ -62,9 +62,13 @@ HELP_BTN = [
         InlineKeyboardButton(text="◖ ᴛᴏᴏʟs ◗", callback_data="TOOLS_DATA"),
     ],
     [
+        InlineKeyboardButton(text="˹ sᴜᴘᴘᴏʀᴛ ˼", url="https://t.me/+OL6jdTL7JAJjYzVl"),
+    ],
+    [
         InlineKeyboardButton(text="↺ ʙᴀᴄᴋ ↻", callback_data="HOME_BACK"),
     ],
 ]
+
 
 HELP_BTON = [
     [
