@@ -44,7 +44,7 @@ DEV_OP = [
 
 PNG_BTN = [
     [
-        InlineKeyboardButton(text="↺ ʙᴀᴄᴋ ↻", callback_data="BACK"),
+        InlineKeyboardButton(text="↺ ᴄʟᴏsᴇ ↻", callback_data="CLOSE"),
     ],
 ]
 
