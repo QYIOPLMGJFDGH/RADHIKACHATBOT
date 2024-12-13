@@ -142,19 +142,17 @@ async def welcomejej(client, message: Message):
                 try:
                     OWNER = config.OWNER_ID
                     if OWNER:
-                        await nexichat.send_photo(
+                        await nexichat.send_text(
                             int(OWNER_ID),
-                            photo=chat_photo,
-                            caption=msg,
+                            text=msg,
                             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(f"{message.from_user.first_name}", user_id=message.from_user.id)]]))
                                 
                     
                 except Exception as e:
                     print(f"Please Provide me correct owner id for send logs")
-                    await nexichat.send_photo(
+                    await nexichat.send_text(
                         int(OWNER_ID),
-                        photo=chat_photo,
-                        caption=msg,
+                        text=msg,
                         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(f"{message.from_user.first_name}", user_id=message.from_user.id)]]))
     except Exception as e:
         print(f"Err: {e}")
