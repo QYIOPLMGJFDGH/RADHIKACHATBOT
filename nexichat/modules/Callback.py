@@ -2,6 +2,7 @@ import random
 import psutil
 import time
 from nexichat import _boot_
+from nexichat import get_readable_time
 from pymongo import MongoClient
 from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
