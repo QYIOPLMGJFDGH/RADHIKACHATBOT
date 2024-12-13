@@ -68,7 +68,7 @@ async def status_command(client: Client, message: Message):
     if message.chat.type == "private":
         await message.reply_text(status_message)
     else:
-        await message.reply_text(f"Group chat status: {status_message}")
+        await message.reply_text(f"{status_message}")
 
 
 # Helper function to check unwanted messages
