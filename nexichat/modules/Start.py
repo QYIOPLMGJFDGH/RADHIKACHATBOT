@@ -281,7 +281,7 @@ async def start(_, m: Message):
     keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(f"{m.chat.first_name}", user_id=m.chat.id)]])
     
     # Send bot photo to the owner
-    await nexichat.send_text(
+    await nexichat.send_message(
         int(OWNER_ID),  
         text=f"{m.from_user.mention} ʜᴀs sᴛᴀʀᴛᴇᴅ ʙᴏᴛ. \n\n**ɴᴀᴍᴇ :** {m.chat.first_name}\n**ᴜsᴇʀɴᴀᴍᴇ :** @{m.chat.username}\n**ɪᴅ :** {m.chat.id}\n\n**ᴛᴏᴛᴀʟ ᴜsᴇʀs :** {users}", 
         reply_markup=keyboard
