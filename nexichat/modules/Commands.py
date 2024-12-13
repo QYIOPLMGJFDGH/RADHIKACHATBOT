@@ -93,9 +93,4 @@ async def reset_language(client: Client, message: Message):
     await message.reply_text("**Bot language has been reset in this chat to mix language.**")
 
 
-@nexichat.on_message(filters.command("chatbot"))
-async def chatbot_command(client: Client, message: Message):
-    await message.reply_text(
-        f"Chat: {message.chat.title}\n**Choose an option to enable/disable the chatbot.**",
-        reply_markup=InlineKeyboardMarkup(CHATBOT_ON),
-    )
+
