@@ -20,8 +20,6 @@ import config
 from nexichat import LOGGER, nexichat, db
 from nexichat.mplugin.helpers import chatai
 from nexichat.mplugin.helpers import (
-    ABOUT_BTN,
-    ABOUT_READ,
     ADMIN_READ,
     START_BOT,
     BACK,
@@ -97,15 +95,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.message.edit(
             text=START,
             reply_markup=InlineKeyboardMarkup(DEV_OP),
-        )
-
-
-    # Show about information
-    elif query.data == "ABOUT":
-        await query.message.edit(
-            text=ABOUT_READ,
-            reply_markup=InlineKeyboardMarkup(ABOUT_BTN),
-            disable_web_page_preview=True,
         )
 
     # Show admin information
