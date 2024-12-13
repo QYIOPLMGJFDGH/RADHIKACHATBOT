@@ -7,16 +7,17 @@ from nexichat import OWNER, nexichat
 START_BOT = [
     [
         InlineKeyboardButton(
-            text="😍 ᴀᴅᴅ ᴍᴇ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ 😍",
-            url="https://t.me/Goodbyenjbot?startgroup=true",
+            text="❖ ᴛᴧᴘ тᴏ sᴇᴇ ᴍᴧɢɪᴄ ❖",
+            url="https://t.me/RADHIKA_CHAT_RROBOT?startgroup=true",
         ),
     ],
     [
-        InlineKeyboardButton(text="🥀 ᴏᴡɴᴇʀ 🥀", user_id=OWNER),
-        InlineKeyboardButton(text="✨ ꜱᴜᴘᴘᴏʀᴛ ✨", url=f"https://t.me/{SUPPORT_GRP}"),
+        InlineKeyboardButton(text="˹ ❍ᴡɴᴇꝛ ˼", user_id=OWNER),
+        InlineKeyboardButton(text="˹ sᴜᴘᴘᴏꝛᴛ ˼", url=f"https://t.me/{SUPPORT_GRP}"),
     ],
     [
-        InlineKeyboardButton(text="« ғᴇᴀᴛᴜʀᴇs »", callback_data="HELP"),
+        InlineKeyboardButton(text="˹ ᴜᴘᴅᴀᴛᴇ ˼", url=f"https://t.me/{UPDATE_CHANNEL}"),
+        InlineKeyboardButton(text="˹ ʜᴇʟᴘ ˼", callback_data="HELP"),
     ],
 ]
 
