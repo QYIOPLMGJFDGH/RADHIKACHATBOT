@@ -21,8 +21,6 @@ import config
 from nexichat import LOGGER, nexichat, db
 from nexichat.modules.helpers import chatai
 from nexichat.modules.helpers import (
-    ABOUT_BTN,
-    ABOUT_READ,
     ADMIN_READ,
     BACK,
     CHATBOT_BACK,
@@ -31,7 +29,6 @@ from nexichat.modules.helpers import (
     HELP_BTN,
     HELP_READ,
     MUSIC_BACK_BTN,
-    SOURCE_READ,
     START,
     START_BOT,
     TOOLS_DATA_READ,
@@ -93,22 +90,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.message.edit(
             text=START_TEXT,  # Use the dynamically fetched START_TEXT
             reply_markup=InlineKeyboardMarkup(DEV_OP),
-        )
-
-    # Show source information
-    elif query.data == "SOURCE":
-        await query.message.edit(
-            text=SOURCE_READ,
-            reply_markup=InlineKeyboardMarkup(BACK),
-            disable_web_page_preview=True,
-        )
-
-    # Show about information
-    elif query.data == "ABOUT":
-        await query.message.edit(
-            text=ABOUT_READ,
-            reply_markup=InlineKeyboardMarkup(ABOUT_BTN),
-            disable_web_page_preview=True,
         )
 
     # Show admin information
