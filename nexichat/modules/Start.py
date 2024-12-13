@@ -274,9 +274,8 @@ async def start(_, m: Message):
     UP, CPU, RAM, DISK = await bot_sys_stats()
 
     # Send bot stats to the user
-    await m.reply_photo(
-        photo=chat_photo, 
-        caption=START.format(users, chats, UP), 
+    await m.reply_text( 
+        text=START.format(users, chats, UP), 
         reply_markup=InlineKeyboardMarkup(START_BOT)
     )
     
@@ -285,10 +284,9 @@ async def start(_, m: Message):
     keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(f"{m.chat.first_name}", user_id=m.chat.id)]])
     
     # Send bot photo to the owner
-    await nexichat.send_photo(
-        int(OWNER_ID), 
-        photo=chat_photo, 
-        caption=f"{m.from_user.mention} ʜᴀs sᴛᴀʀᴛᴇᴅ ʙᴏᴛ. \n\n**ɴᴀᴍᴇ :** {m.chat.first_name}\n**ᴜsᴇʀɴᴀᴍᴇ :** @{m.chat.username}\n**ɪᴅ :** {m.chat.id}\n\n**ᴛᴏᴛᴀʟ ᴜsᴇʀs :** {users}", 
+    await nexichat.send_text(
+        int(OWNER_ID),  
+        text=f"{m.from_user.mention} ʜᴀs sᴛᴀʀᴛᴇᴅ ʙᴏᴛ. \n\n**ɴᴀᴍᴇ :** {m.chat.first_name}\n**ᴜsᴇʀɴᴀᴍᴇ :** @{m.chat.username}\n**ɪᴅ :** {m.chat.id}\n\n**ᴛᴏᴛᴀʟ ᴜsᴇʀs :** {users}", 
         reply_markup=keyboard
     )
     
