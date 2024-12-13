@@ -20,6 +20,7 @@ from nexichat.modules.helpers import (
     START,
     START_BOT,
     PNG_BTN,
+    HELP_BTON,
     CLOSE_BTN,
     HELP_BTN,
     HELP_BUTN,
@@ -323,7 +324,7 @@ async def help(client: nexichat, m: Message):
     if m.chat.type == ChatType.PRIVATE:
         hmm = await m.reply_text(
             text=HELP_READ,
-            reply_markup=InlineKeyboardMarkup(HELP_BTN),
+            reply_markup=InlineKeyboardMarkup(HELP_BTON),
         )
 
     else:
