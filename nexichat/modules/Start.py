@@ -263,28 +263,29 @@ async def start(_, m: Message):
     chats = len(await get_served_chats())
     
     if m.chat.type == ChatType.PRIVATE:
-        accha = await m.reply_text(
-            text="**__ᴅ__**"
-        )
+        # Send initial text
+        accha = await m.reply_text("**__ᴅ__**")
         await asyncio.sleep(0.5)
         
-        # Define the sequence of texts to be edited
-        text_sequence = [
-            "**__ᴅ__**", "**__ᴅι__**", "**__ᴅιи__**", "**__ᴅιиg__**", "**__ᴅιиg ᴅ__**", 
-            "**__ᴅιиg ᴅσ__**", "**__ᴅιиg ᴅσи__**", "**__ᴅιиg ᴅσиg__**", "**__ᴅιиg ᴅσиg ꨄ︎__**", 
-            "**__ᴅιиg ᴅσиg ꨄ ѕ__**", "**__ᴅιиг ᴅσиg ꨄ sт__**", "**__ᴅιиg ᴅσиg ꨄ︎ ѕтα__**", 
-            "**__ᴅιиg ᴅσиg ꨄ︎ ѕтαя__**", "**__ᴅιиg ᴅσиg ꨄ sтαят__**", "**__ᴅιиg ᴅσиg ꨄ︎ sтαятι__**", 
-            "**__ᴅιиg ᴅσиg ꨄ︎ sтαятιи__**", "**__ᴅιиg ᴅσиg ꨄ sтαятιиg__**", "**__ᴅιиg ᴅσиg ꨄ︎ ѕтαятιиg.__**", 
-            "**__ᴅιиg ᴅσиg ꨄ sтαятιиг.....__**", "**__ᴅιиg ᴅσиg ꨄ︎ ѕтαятιиг.__**", "**__ᴅιиg ᴅσиг ꨄ sтαятιиг.....__**"
+        # Create a list of texts for editing
+        texts = [
+            "**__ᴅ__**", "**__ᴅι__**", "**__ᴅιи__**", "**__ᴅιиg__**", 
+            "**__ᴅιиg ᴅ__**", "**__ᴅιиg ᴅσ__**", "**__ᴅιиg ᴅσи__**", 
+            "**__ᴅιиg ᴅσиg__**", "**__ᴅιиg ᴅσиg ꨄ︎__**", 
+            "**__ᴅιиg ᴅσиg ꨄ︎ ѕ__**", "**__ᴅιиg ᴅσиg ꨄ sт__**", 
+            "**__ᴅιиg ᴅσиg ꨄ︎ ѕтα__**", "**__ᴅιиg ᴅσиg ꨄ︎ ѕтαя__**", 
+            "**__ᴅιиg ᴅσиg ꨄ sтαят__**", "**__ᴅιиg ᴅσиg ꨄ︎ sтαятι__**", 
+            "**__ᴅιиg ᴅσиg ꨄ︎ sтαятιи__**", "**__ᴅιиg ᴅσиg ꨄ sтαятιиg__**", 
+            "**__ᴅιиg ᴅσиg ꨄ︎ ѕтαятιиg.__**", "**__ᴅιиg ᴅσиg ꨄ sтαятιиg.....__**", 
+            "**__ᴅιиg ᴅσиg ꨄ︎ ѕтαятιиg.__**", "**__ᴅιиg ᴅσиg ꨄ sтαятιиg.....__**"
         ]
         
-        # Iterate through the text sequence and update the message if content changes
-        for text in text_sequence:
-            timestamped_text = f"{text} {int(time.time())}"  # Append a timestamp to make the text unique
-            if accha.text != timestamped_text:  # Check if the text is different
-                await accha.edit(timestamped_text)
-            await asyncio.sleep(0.01)
-
+        # Iterate through the texts list to apply edits
+        for text in texts:
+            await accha.edit(text)
+            await asyncio.sleep(0.01)  # Short sleep to mimic typing effect
+        
+        # Delete the message after all edits
         await accha.delete()
 
         # Always use the bot's default image
@@ -320,6 +321,7 @@ async def start(_, m: Message):
             reply_markup=InlineKeyboardMarkup(HELP_START),
         )
         await add_served_chat(m.chat.id)
+
 
 
 @nexichat.on_cmd("help")
