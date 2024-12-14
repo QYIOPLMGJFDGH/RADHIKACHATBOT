@@ -6,12 +6,15 @@ from pyrogram import Client, filters
 
 START = """<pre>🐰⃟⃞⍣Rᴀᴅʜɪᴋᴀ❥ Cʟᴏɴᴇᦔ Bᴏᴛ ❥</pre>
 <pre><code class="language-➥ ᴇɴᴀʙʟᴇᴅ/ᴅɪꜱᴀʙʟᴇᴅ ʙʏ /chatbot">➥ ᴄʟᴏɴᴇ ʙʏ /clone</code></pre>
-<blockquote expandable>╔═════════════════╗
-║⥂ ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ ⬀ {}
-║⥂ ᴛᴏᴛᴀʟ ᴄʜᴀᴛꜱ ⬀ {}
-║⥂ ᴜᴘᴛɪᴍᴇ ⬀ {}               
-╚═════════════════╝</blockquote>
+<blockquote expandable>
+╔═════════════════╗<br>
+║⥂ ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ ⬀ <b>{}</b><br>
+║⥂ ᴛᴏᴛᴀʟ ᴄʜᴀᴛꜱ ⬀ <b>{}</b><br>
+║⥂ ᴜᴘᴛɪᴍᴇ ⬀ <b>{}</b><br>               
+╚═════════════════╝
+</blockquote>
 """
+
 
 
 HELP_READ = f"""```
