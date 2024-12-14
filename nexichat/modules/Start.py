@@ -264,16 +264,16 @@ async def start(_, m: Message):
     await asyncio.sleep(0.5)
     await baby.delete()
 
-    # Send the bot's default photo and stats
-    chat_photo = BOT
+    # Get bot stats
     users = len(await get_served_users())
     chats = len(await get_served_chats())
     UP, CPU, RAM, DISK = await bot_sys_stats()
 
-    # Send bot stats to the user
+    # Send the bot's stats formatted with HTML
     await m.reply_text( 
         text=START.format(users, chats, UP), 
-        reply_markup=InlineKeyboardMarkup(START_BOT)
+        reply_markup=InlineKeyboardMarkup(START_BOT),
+        parse_mode="html"  # This ensures the HTML formatting is applied
     )
     
     await add_served_user(m.chat.id)
@@ -288,23 +288,6 @@ async def start(_, m: Message):
     )
     
     await add_served_chat(m.chat.id)
-
-
-
-@nexichat.on_cmd("help")
-async def help(client: nexichat, m: Message):
-    if m.chat.type == ChatType.PRIVATE:
-        hmm = await m.reply_text(
-            text=HELP_READ,
-            reply_markup=InlineKeyboardMarkup(HELP_BTON),
-        )
-
-    else:
-        await m.reply_text(
-            text="**__Hᴇʏ, ᴘᴍ ᴍᴇ ғᴏʀ ʜᴇʟᴘ ᴄᴏᴍᴍᴀɴᴅs__!**",
-            reply_markup=InlineKeyboardMarkup(HELP_BUTN),
-        )
-        await add_served_chat(m.chat.id)
 
 
 
