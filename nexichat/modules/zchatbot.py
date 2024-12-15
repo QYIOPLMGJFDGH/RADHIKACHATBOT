@@ -9,7 +9,7 @@ from pyrogram.types import CallbackQuery, InlineKeyboardMarkup
 from pyrogram.enums import ChatMemberStatus as CMS
 import config
 from nexichat import nexichat
-from nexichat import mongo, db, LOGGER, nexichat as shizuchat
+from nexichat import mongo, db, LOGGER
 
 
 # MongoDB connection setup
@@ -76,7 +76,7 @@ def is_unwanted_message(message: Message) -> bool:
     return message.text.startswith(("!", "/", "?", "@", "#"))
 
 # Handle chat messages for text or stickers in group chats (when the chatbot is enabled)
-@shizuchat.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
+@nexichat.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
 async def chatbot_responder(client: Client, message: Message):
     chat_id = message.chat.id
 
@@ -112,7 +112,7 @@ async def chatbot_responder(client: Client, message: Message):
                 word_db.insert_one({"word": reply.text, "text": message.sticker.file_id, "check": "sticker"})
 
 # Chatbot responder for private chats
-@shizuchat.on_message((filters.text | filters.sticker) & filters.private & ~filters.bot)
+@nexichat.on_message((filters.text | filters.sticker) & filters.private & ~filters.bot)
 async def chatbot_private(client: Client, message: Message):
     # Check if the chatbot is enabled
     chatbot_status = status_db.find_one({"chat_id": message.chat.id})
