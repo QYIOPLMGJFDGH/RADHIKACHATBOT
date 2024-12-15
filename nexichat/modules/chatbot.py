@@ -11,30 +11,18 @@ import config
 from nexichat import nexichat
 from nexichat import mongo, db, LOGGER
 
-# MongoDB connection setup for 5 different MongoDBs
-client_db_1 = MongoClient("mongodb+srv://bikash:bikash@bikash.3jkvhp7.mongodb.net/?retryWrites=true&w=majority")
-client_db_2 = MongoClient("mongodb+srv://Bikash:Bikash@bikash.yl2nhcy.mongodb.net/?retryWrites=true&w=majority")
-client_db_3 = MongoClient("mongodb+srv://hnyx:wywyw2@cluster0.9dxlslv.mongodb.net/?retryWrites=true&w=majority")
-client_db_4 = MongoClient("mongodb+srv://ravi:ravi12345@cluster0.hndinhj.mongodb.net/?retryWrites=true&w=majority")
-client_db_5 = MongoClient("mongodb+srv://userbot:userbot@cluster0.iweqz.mongodb.net/test?retryWrites=true&w=majority")
+# OpenAI API key setup
+openai.api_key = ""
 
-# Defining collections for each MongoDB
-db1_chats = client_db_1["ChatsDb"]["ChatCollection1"]
-db2_chats = client_db_2["ChatsDb"]["ChatCollection2"]
-db3_chats = client_db_3["ChatsDb"]["ChatCollection3"]
-db4_chats = client_db_4["ChatsDb"]["ChatCollection4"]
-db5_chats = client_db_5["ChatsDb"]["ChatCollection5"]
-
-# Status DB (for enabling/disabling chatbot)
-status_db = client_db_1["StatusDb"]["ChatStatus"]
-
-# Helper function to store chat data into 5 databases
-def store_in_databases(chat_id, user_id, message, date):
-    db1_chats.insert_one({"chat_id": chat_id, "user_id": user_id, "message": message, "date": date})
-    db2_chats.insert_one({"chat_id": chat_id, "user_id": user_id, "message": message, "date": date})
-    db3_chats.insert_one({"chat_id": chat_id, "user_id": user_id, "message": message, "date": date})
-    db4_chats.insert_one({"chat_id": chat_id, "user_id": user_id, "message": message, "date": date})
-    db5_chats.insert_one({"chat_id": chat_id, "user_id": user_id, "message": message, "date": date})
+# Function to generate response from ChatGPT
+async def get_gpt_response(message_text):
+    response = openai.Completion.create(
+        engine="text-davinci-003",  # Use your preferred GPT model
+        prompt=message_text,
+        max_tokens=150,
+        temperature=0.7
+    )
+    return response.choices[0].text.strip()
 
 # Function to simulate typing each word individually
 async def type_message_with_typing(client: Client, chat_id: int, message_text: str):
@@ -63,49 +51,22 @@ async def chatbot_command(client: Client, message: Message):
         status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "enabled"}}, upsert=True)
         
         # Send confirmation message
-        await message.reply_text(
-            f"Cʜᴀᴛ: ➥ {message.chat.title}\nCʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴇɴᴀʙʟᴇᴅ."
-        )
+        await message.reply_text(f"Chatbot has been enabled for {message.chat.title}.")
         
     elif command == "off":
         # Disable the chatbot for the chat
         status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "disabled"}}, upsert=True)
 
         # Send confirmation message
-        await message.reply_text(
-            f"Cʜᴀᴛ: ➥{message.chat.title}\nCʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ."
-        )
+        await message.reply_text(f"Chatbot has been disabled for {message.chat.title}.")
         
     else:
-        # If no valid command is provided, show a help message
         await message.reply_text(
-            "Usᴇs:⤸⤸⤸\n/chatbot on - ᴛᴏ ᴇɴᴀʙʟᴇ ᴛʜᴇ ᴄʜᴀᴛʙᴏᴛ\n/chatbot off - ᴛᴏ ᴅɪsᴀʙʟᴇ ᴛʜᴇ ᴄʜᴀᴛʙᴏᴛ"
+            "Usage:\n/chatbot on - to enable the chatbot\n/chatbot off - to disable the chatbot"
         )
 
-# Handle /status command to check the chatbot status in private chats
-@nexichat.on_message(filters.command("status") & (filters.private | filters.group))
-async def status_command(client: Client, message: Message):
-    """Handle /status command to show chatbot status in private chat and group chat."""
-    chat_id = message.chat.id
-    chat_status = status_db.find_one({"chat_id": chat_id})
-
-    if chat_status and chat_status.get("status") == "enabled":
-        status_message = "ᴄʜᴀᴛʙᴏᴛ : ᴇɴᴀʙʟᴇᴅ"
-    else:
-        status_message = "ᴄʜᴀᴛʙᴏᴛ : ᴅɪsᴀʙʟᴇᴅ"
-
-    # If the message is in a group, reply in the group, otherwise in private
-    if message.chat.type == "private":
-        await message.reply_text(status_message)
-    else:
-        await message.reply_text(f"{status_message}")
-
-# Helper function to check unwanted messages
-def is_unwanted_message(message: Message) -> bool:
-    return message.text.startswith(("!", "/", "?", "@", "#"))
-
-# Handle chat messages for text or stickers in group chats (when the chatbot is enabled)
-@nexichat.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
+# Handle chat messages for text in group chats (when the chatbot is enabled)
+@nexichat.on_message(filters.text & ~filters.private & ~filters.bot)
 async def chatbot_responder(client: Client, message: Message):
     chat_id = message.chat.id
 
@@ -114,70 +75,22 @@ async def chatbot_responder(client: Client, message: Message):
     if not chatbot_status or chatbot_status.get("status") == "disabled":
         return
 
-    # Store the chat message in the 5 databases for historical tracking
-    store_in_databases(chat_id, message.from_user.id, message.text, message.date)
-
-    # Check if it's a reply
-    if not message.reply_to_message:
-        responses = []
-        # Query from multiple databases
-        for db in [db1_chats, db2_chats, db3_chats, db4_chats, db5_chats]:
-            responses.extend(list(db.find({"message": {"$regex": f'.*{message.text}.*', "$options": 'i'}})))
-        
-        # Filter and select unique responses
-        unique_responses = list(set([response["message"] for response in responses]))
-        if unique_responses:
-            # Choose a random response for uniqueness
-            response = random.choice(unique_responses)
-            # Call the typing effect function to type each word
-            await type_message_with_typing(client, chat_id, response)
-    else:
-        reply = message.reply_to_message
-        if reply.from_user.id == (await client.get_me()).id:
-            responses = []
-            for db in [db1_chats, db2_chats, db3_chats, db4_chats, db5_chats]:
-                responses.extend(list(db.find({"message": {"$regex": f'.*{message.text}.*', "$options": 'i'}})))
-            
-            unique_responses = list(set([response["message"] for response in responses]))
-            if unique_responses:
-                response = random.choice(unique_responses)
-                await type_message_with_typing(client, chat_id, response)
-        else:
-            # Store the message if it's a reply from another user
-            store_in_databases(chat_id, message.from_user.id, message.text, message.date)
+    # Generate a response using OpenAI GPT
+    gpt_response = await get_gpt_response(message.text)
+    
+    # Send the response with typing effect
+    await type_message_with_typing(client, chat_id, gpt_response)
 
 # Chatbot responder for private chats
-@nexichat.on_message((filters.text | filters.sticker) & filters.private & ~filters.bot)
+@nexichat.on_message(filters.text & filters.private & ~filters.bot)
 async def chatbot_private(client: Client, message: Message):
     # Check if the chatbot is enabled
     chatbot_status = status_db.find_one({"chat_id": message.chat.id})
     if not chatbot_status or chatbot_status.get("status") == "disabled":
         return
 
-    # Store the chat message in the 5 databases for historical tracking
-    store_in_databases(message.chat.id, message.from_user.id, message.text, message.date)
-
-    # Check if it's a reply
-    if not message.reply_to_message:
-        responses = []
-        for db in [db1_chats, db2_chats, db3_chats, db4_chats, db5_chats]:
-            responses.extend(list(db.find({"message": {"$regex": f'.*{message.text}.*', "$options": 'i'}})))
-        
-        unique_responses = list(set([response["message"] for response in responses]))
-        if unique_responses:
-            response = random.choice(unique_responses)
-            await type_message_with_typing(client, message.chat.id, response)
-    else:
-        reply = message.reply_to_message
-        if reply.from_user.id == (await client.get_me()).id:
-            responses = []
-            for db in [db1_chats, db2_chats, db3_chats, db4_chats, db5_chats]:
-                responses.extend(list(db.find({"message": {"$regex": f'.*{message.text}.*', "$options": 'i'}})))
-            
-            unique_responses = list(set([response["message"] for response in responses]))
-            if unique_responses:
-                response = random.choice(unique_responses)
-                await type_message_with_typing(client, message.chat.id, response)
-        else:
-            # Store the message if it's a reply from another user
-            store_in_databases(message.chat.id, message.from_user.id, message.text, message.date)
+    # Generate a response using OpenAI GPT
+    gpt_response = await get_gpt_response(message.text)
+    
+    # Send the response with typing effect
+    await type_message_with_typing(client, message.chat.id, gpt_response)
