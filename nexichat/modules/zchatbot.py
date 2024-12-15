@@ -5,12 +5,11 @@ from pyrogram import Client, filters
 from pyrogram.errors import MessageEmpty
 from pyrogram.enums import ChatAction
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
-from pyrogram.types import CallbackQuery, InlineKeyboardMarkup
+from pyrogram.types import CallbackQuery
 from pyrogram.enums import ChatMemberStatus as CMS
 import config
 from nexichat import nexichat
 from nexichat import mongo, db, LOGGER
-
 
 # MongoDB connection setup
 client_db = MongoClient(config.MONGO_URL)
@@ -144,3 +143,4 @@ async def chatbot_private(client: Client, message: Message):
                 word_db.insert_one({"word": reply.text, "text": message.text, "check": "text"})
             elif message.sticker:
                 word_db.insert_one({"word": reply.text, "text": message.sticker.file_id, "check": "sticker"})
+
