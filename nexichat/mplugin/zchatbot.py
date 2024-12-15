@@ -16,6 +16,7 @@ client_db = MongoClient(config.MONGO_URL)
 chatai = client_db["Word"]["WordDb"]
 vick_db = client_db["VickDb"]["Vick"]
 status_db = client_db["StatusDb"]["ChatStatus"]  # Chat status collection
+word_db = client_db["WordDb"]["Words"]  # Database to store word responses
 
 # Handle the /chatbot command to enable or disable the chatbot
 @Client.on_message(filters.command("chatbot"))
@@ -33,7 +34,7 @@ async def chatbot_command(client: Client, message: Message):
         
         # Send confirmation message
         await message.reply_text(
-            f"Cʜᴀᴛ: ➥ {message.chat.title}\nCʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴇɴᴀʙʟᴇᴅ.**"
+            f"Cʜᴀᴛ: ➥ {message.chat.title}\nCʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴇɴᴀʙʟᴇᴅ."
         )
         
     elif command == "off":
@@ -42,7 +43,7 @@ async def chatbot_command(client: Client, message: Message):
 
         # Send confirmation message
         await message.reply_text(
-            f"Cʜᴀᴛ: ➥{message.chat.title}\n**Cʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ.**"
+            f"Cʜᴀᴛ: ➥{message.chat.title}\nCʜᴀᴛʙᴏᴛ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ."
         )
         
     else:
@@ -55,14 +56,13 @@ async def chatbot_command(client: Client, message: Message):
 @Client.on_message(filters.command("status") & (filters.private | filters.group))
 async def status_command(client: Client, message: Message):
     """Handle /status command to show chatbot status in private chat and group chat."""
-    user_id = message.from_user.id
     chat_id = message.chat.id
-    chat_status = status_db.find_one({"chat_id": user_id})
+    chat_status = status_db.find_one({"chat_id": chat_id})
 
     if chat_status and chat_status.get("status") == "enabled":
-        status_message = "ᴄʜᴀᴛʙᴏᴛ : ᴇɴᴀʙʟᴇ"
+        status_message = "ᴄʜᴀᴛʙᴏᴛ : ᴇɴᴀʙʟᴇᴅ"
     else:
-        status_message = "ᴄʜᴀᴛʙᴏᴛ : ᴅɪsᴀʙʟᴇ"
+        status_message = "ᴄʜᴀᴛʙᴏᴛ : ᴅɪsᴀʙʟᴇᴅ"
 
     # If the message is in a group, reply in the group, otherwise in private
     if message.chat.type == "private":
@@ -70,85 +70,76 @@ async def status_command(client: Client, message: Message):
     else:
         await message.reply_text(f"{status_message}")
 
-
 # Helper function to check unwanted messages
 def is_unwanted_message(message: Message) -> bool:
     return message.text.startswith(("!", "/", "?", "@", "#"))
 
 # Handle chat messages for text or stickers in group chats (when the chatbot is enabled)
-@Client.on_message((filters.text | filters.sticker | filters.group) & ~filters.private & ~filters.bot)
-async def chatbot_response(client: Client, message: Message):
-    try:
-        if is_unwanted_message(message):
-            return
-        
-        # Check if the chatbot is enabled for the group
-        chat_status = status_db.find_one({"chat_id": message.chat.id})
-        if chat_status and chat_status.get("status") == "disabled":
-            # If the chatbot is disabled, do not respond
-            return
+@Client.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
+async def chatbot_responder(client: Client, message: Message):
+    chat_id = message.chat.id
 
-        word = message.text if message.text else message.sticker.file_unique_id
-        await handle_chatbot_response(client, message, word)
-    except Exception as e:
-        LOGGER.error(f"Error in chatbot_response: {e}")
+    # Check if the chatbot is enabled
+    chatbot_status = status_db.find_one({"chat_id": chat_id})
+    if not chatbot_status or chatbot_status.get("status") == "disabled":
+        return
 
-# Private chat response (handling private messages)
+    await client.send_chat_action(chat_id, ChatAction.TYPING)
+
+    if not message.reply_to_message:
+        responses = list(word_db.find({"word": message.text}))
+        if responses:
+            response = random.choice(responses)
+            if response["check"] == "sticker":
+                await message.reply_sticker(response["text"])
+            else:
+                await message.reply_text(response["text"])
+    else:
+        reply = message.reply_to_message
+        if reply.from_user.id == (await client.get_me()).id:
+            responses = list(word_db.find({"word": message.text}))
+            if responses:
+                response = random.choice(responses)
+                if response["check"] == "sticker":
+                    await message.reply_sticker(response["text"])
+                else:
+                    await message.reply_text(response["text"])
+        else:
+            if message.text:
+                word_db.insert_one({"word": reply.text, "text": message.text, "check": "text"})
+            elif message.sticker:
+                word_db.insert_one({"word": reply.text, "text": message.sticker.file_id, "check": "sticker"})
+
+# Chatbot responder for private chats
 @Client.on_message((filters.text | filters.sticker) & filters.private & ~filters.bot)
-async def vickprivate(client: Client, message: Message):
-    try:
-        # Check if the chatbot is enabled for the user
-        user_status = status_db.find_one({"chat_id": message.from_user.id})
-        if user_status and user_status.get("status") == "disabled":
-            return
+async def chatbot_private(client: Client, message: Message):
+    # Check if the chatbot is enabled
+    chatbot_status = status_db.find_one({"chat_id": message.chat.id})
+    if not chatbot_status or chatbot_status.get("status") == "disabled":
+        return
 
-        word = message.text if message.text else message.sticker.file_unique_id
-        await handle_chatbot_response(client, message, word)
-    except Exception as e:
-        LOGGER.error(f"Error in vickprivate: {e}")
+    await client.send_chat_action(message.chat.id, ChatAction.TYPING)
 
-# Helper function to handle chatbot responses (reply with text or sticker)
-async def handle_chatbot_response(client: Client, message: Message, word: str):
-    try:
-        # If no reply is present in the message
-        if not message.reply_to_message:
-            is_vick = vick_db.find_one({"chat_id": message.chat.id})
-            if not is_vick:
-                await client.send_chat_action(message.chat.id, ChatAction.TYPING)
-                K = [x["text"] for x in chatai.find({"word": word})]
-                if K:
-                    hey = random.choice(K)
-                    is_text = chatai.find_one({"text": hey})
-                    if is_text["check"] == "sticker":
-                        await message.reply_sticker(hey)
-                    else:
-                        await message.reply_text(hey)
-
-        # Handle reply messages
-        elif message.reply_to_message:
-            is_vick = vick_db.find_one({"chat_id": message.chat.id})
-
-            if message.reply_to_message.from_user.id == client.id and not is_vick:
-                await client.send_chat_action(message.chat.id, ChatAction.TYPING)
-                K = [x["text"] for x in chatai.find({"word": word})]
-                if K:
-                    hey = random.choice(K)
-                    is_text = chatai.find_one({"text": hey})
-                    if is_text["check"] == "sticker":
-                        await message.reply_sticker(hey)
-                    else:
-                        await message.reply_text(hey)
-
-            if message.reply_to_message.from_user.id != client.id:
-                # Insert new word-text pair if not found
-                if message.text:
-                    is_chat = chatai.find_one({"word": message.reply_to_message.text, "text": message.text})
-                    if not is_chat:
-                        chatai.insert_one({"word": message.reply_to_message.text, "text": message.text, "check": "none"})
-                if message.sticker:
-                    is_chat = chatai.find_one({"word": message.reply_to_message.text, "id": message.sticker.file_unique_id})
-                    if not is_chat:
-                        chatai.insert_one({"word": message.reply_to_message.text, "text": message.sticker.file_id, "check": "sticker", "id": message.sticker.file_unique_id})
-
-    except Exception as e:
-        LOGGER.error(f"Error in handle_chatbot_response: {e}")
+    if not message.reply_to_message:
+        responses = list(word_db.find({"word": message.text}))
+        if responses:
+            response = random.choice(responses)
+            if response["check"] == "sticker":
+                await message.reply_sticker(response["text"])
+            else:
+                await message.reply_text(response["text"])
+    else:
+        reply = message.reply_to_message
+        if reply.from_user.id == (await client.get_me()).id:
+            responses = list(word_db.find({"word": message.text}))
+            if responses:
+                response = random.choice(responses)
+                if response["check"] == "sticker":
+                    await message.reply_sticker(response["text"])
+                else:
+                    await message.reply_text(response["text"])
+        else:
+            if message.text:
+                word_db.insert_one({"word": reply.text, "text": message.text, "check": "text"})
+            elif message.sticker:
+                word_db.insert_one({"word": reply.text, "text": message.sticker.file_id, "check": "sticker"})
