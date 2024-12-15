@@ -12,11 +12,11 @@ from nexichat import nexichat
 from nexichat import mongo, db, LOGGER
 
 # MongoDB connection setup for 5 different MongoDBs
-client_db_1 = MongoClient(config.MONGO_URL_1)
-client_db_2 = MongoClient(config.MONGO_URL_2)
-client_db_3 = MongoClient(config.MONGO_URL_3)
-client_db_4 = MongoClient(config.MONGO_URL_4)
-client_db_5 = MongoClient(config.MONGO_URL_5)
+client_db_1 = MongoClient("mongodb+srv://bikash:bikash@bikash.3jkvhp7.mongodb.net/?retryWrites=true&w=majority")
+client_db_2 = MongoClient("mongodb+srv://Bikash:Bikash@bikash.yl2nhcy.mongodb.net/?retryWrites=true&w=majority")
+client_db_3 = MongoClient("mongodb+srv://hnyx:wywyw2@cluster0.9dxlslv.mongodb.net/?retryWrites=true&w=majority")
+client_db_4 = MongoClient("mongodb+srv://ravi:ravi12345@cluster0.hndinhj.mongodb.net/?retryWrites=true&w=majority")
+client_db_5 = MongoClient("mongodb+srv://userbot:userbot@cluster0.iweqz.mongodb.net/test?retryWrites=true&w=majority")
 
 # Defining collections for each MongoDB
 db1_chats = client_db_1["ChatsDb"]["ChatCollection1"]
@@ -157,6 +157,7 @@ async def chatbot_private(client: Client, message: Message):
     # Store the chat message in the 5 databases for historical tracking
     store_in_databases(message.chat.id, message.from_user.id, message.text, message.date)
 
+    # Check if it's a reply
     if not message.reply_to_message:
         responses = []
         for db in [db1_chats, db2_chats, db3_chats, db4_chats, db5_chats]:
@@ -178,5 +179,5 @@ async def chatbot_private(client: Client, message: Message):
                 response = random.choice(unique_responses)
                 await type_message_with_typing(client, message.chat.id, response)
         else:
-            if message.text:
-                store_in_databases(message.chat.id, message.from_user.id, message.text, message.date)
+            # Store the message if it's a reply from another user
+            store_in_databases(message.chat.id, message.from_user.id, message.text, message.date)
