@@ -1,7 +1,7 @@
-from telegram import Bot
-from telegram.ext import Application, MessageHandler, CallbackContext, filters, Update
-import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from telegram import Update
+from telegram.ext import Application, MessageHandler, CallbackContext, filters, Bot
+import torch
 import logging
 import asyncio
 
