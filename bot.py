@@ -1,5 +1,6 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from telegram.ext import Application, MessageHandler, CallbackContext, filters, Update
+from telegram.ext import Application, MessageHandler, CallbackContext, filters
+from telegram import Update
 import torch
 import logging
 import asyncio
