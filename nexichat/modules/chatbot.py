@@ -1,101 +1,152 @@
 import random
-import asyncio
-from pymongo import MongoClient
 from pyrogram import Client, filters
-from pyrogram.errors import MessageEmpty
-from pyrogram.enums import ChatAction
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
-from pyrogram.types import CallbackQuery
-from pyrogram.enums import ChatMemberStatus as CMS
-import config
-import openai
 from nexichat import nexichat
-from nexichat import mongo, db, LOGGER
+from pyrogram.types import Message
+from pyrogram.enums import ChatAction
+from pymongo import MongoClient
 
-client = MongoClient(config.MONGO_URL)  # Mongo URI from config
-db = client["chatbot_db"]  # Name of your database, can be changed if needed
-status_db = db["status"]  # Collection name for storing chatbot status
-# OpenAI API key setup
-openai.api_key = config.OPENAI  # Set the API key from config
+MONGO_DB_URI = "mongodb+srv://teamdaxx123:teamdaxx123@cluster0.ysbpgcp.mongodb.net/?retryWrites=true&w=majority"
+# MongoDB Initialization
+mongo_client = MongoClient(MONGO_DB_URI)
+chatbot_db = mongo_client["VickDb"]["Vick"]  # Stores chatbot status (enabled/disabled)
+word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
+user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
 
-
-async def get_gpt_response(message_text):
-    response = openai.Completion.create(
-        model="gpt-3.5-turbo",  # Updated model
-        prompt=message_text,
-        max_tokens=150,
-        temperature=0.7
-    )
-    return response.choices[0].text.strip()
-
-
-# Function to simulate typing each word individually
-async def type_message_with_typing(client: Client, chat_id: int, message_text: str):
-    """Simulate typing one word at a time."""
-    words = message_text.split()  # Split the message into words
-    for word in words:
-        # Simulate typing action
-        await client.send_chat_action(chat_id, ChatAction.TYPING)
-        await asyncio.sleep(0.5)  # Time delay between words to simulate typing
-        # Send the word as a message
-        await client.send_message(chat_id, word)
-        await asyncio.sleep(1)  # Delay before sending the next word
-
-# Handle the /chatbot command to enable or disable the chatbot
-@nexichat.on_message(filters.command("chatbot"))
-async def chatbot_command(client: Client, message: Message):
-    """Handle /chatbot command to enable/disable chatbot."""
-    if len(message.command) > 1:
-        command = message.command[1].lower()  # Get the second part of the command
-    else:
-        command = ''
-
+# Command to disable the chatbot (works for all users in both private and group chats)
+@nexichat.on_message(filters.command(["chatbot off"], prefixes=["/"]))
+async def chatbot_off(client, message: Message):
     chat_id = message.chat.id
-    if command == "on":
-        # Enable the chatbot for the chat
-        status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "enabled"}}, upsert=True)
-        
-        # Send confirmation message
-        await message.reply_text(f"Chatbot has been enabled for {message.chat.title}.")
-        
-    elif command == "off":
-        # Disable the chatbot for the chat
-        status_db.update_one({"chat_id": chat_id}, {"$set": {"status": "disabled"}}, upsert=True)
 
-        # Send confirmation message
-        await message.reply_text(f"Chatbot has been disabled for {message.chat.title}.")
-        
-    else:
-        await message.reply_text(
-            "Usage:\n/chatbot on - to enable the chatbot\n/chatbot off - to disable the chatbot"
+    # Disable the chatbot by updating the database
+    chatbot_db.update_one(
+        {"chat_id": chat_id},
+        {"$set": {"status": "disabled"}},
+        upsert=True
+    )
+
+    # If it's a private chat, update the user status in the database
+    if message.chat.type == "private":
+        user_id = message.from_user.id
+        user_status_db.update_one(
+            {"user_id": user_id},
+            {"$set": {"status": "disabled", "chat_id": chat_id}},
+            upsert=True
         )
+        await message.reply_text("Chatbot Disabled in Private Chat!")
+    else:
+        await message.reply_text("Chatbot Disabled in Group!")
 
-# Handle chat messages for text in group chats (when the chatbot is enabled)
-@nexichat.on_message(filters.text & ~filters.private & ~filters.bot)
+# Command to enable the chatbot (works in both private and group chats)
+@nexichat.on_message(filters.command(["chatbot on"], prefixes=["/"]))
+async def chatbot_on(client, message: Message):
+    chat_id = message.chat.id
+
+    # Enable the chatbot by updating the database
+    chatbot_db.update_one(
+        {"chat_id": chat_id},
+        {"$set": {"status": "enabled"}},
+        upsert=True
+    )
+
+    # If it's a private chat, update the user status in the database
+    if message.chat.type == "private":
+        user_id = message.from_user.id
+        user_status_db.update_one(
+            {"user_id": user_id},
+            {"$set": {"status": "enabled", "chat_id": chat_id}},
+            upsert=True
+        )
+        await message.reply_text("Chatbot Enabled in Private Chat!")
+    else:
+        await message.reply_text("Chatbot Enabled in Group!")
+
+# Command to display chatbot status (on/off) in private and group chats
+@nexichat.on_message(filters.command(["chatbot"], prefixes=["/"]))
+async def chatbot_usage(client, message: Message):
+    chat_id = message.chat.id
+
+    # Fetch chatbot status from the database
+    chatbot_status = chatbot_db.find_one({"chat_id": chat_id})
+    if chatbot_status and chatbot_status.get("status") == "enabled":
+        status_message = "Chatbot is currently **enabled**."
+    else:
+        status_message = "Chatbot is currently **disabled**."
+
+    # Handle the message depending on whether it's in a private chat or a group chat
+    if message.chat.type == "private":
+        # Private chat
+        await message.reply_text(f"**Usage:**\n`/chatbot [on/off]`\n{status_message}\nChatbot commands work here!")
+    else:
+        # Group chat
+        await message.reply_text(f"**Usage:**\n`/chatbot [on/off]`\n{status_message}\nChatbot commands only work in groups.")
+
+
+# Chatbot responder for group chats
+@nexichat.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
 async def chatbot_responder(client: Client, message: Message):
     chat_id = message.chat.id
 
     # Check if the chatbot is enabled
-    chatbot_status = status_db.find_one({"chat_id": chat_id})
+    chatbot_status = chatbot_db.find_one({"chat_id": chat_id})
     if not chatbot_status or chatbot_status.get("status") == "disabled":
         return
 
-    # Generate a response using OpenAI GPT
-    gpt_response = await get_gpt_response(message.text)
-    
-    # Send the response with typing effect
-    await type_message_with_typing(client, chat_id, gpt_response)
+    await app.send_chat_action(chat_id, ChatAction.TYPING)
+
+    if not message.reply_to_message:
+        responses = list(word_db.find({"word": message.text}))
+        if responses:
+            response = random.choice(responses)
+            if response["check"] == "sticker":
+                await message.reply_sticker(response["text"])
+            else:
+                await message.reply_text(response["text"])
+    else:
+        reply = message.reply_to_message
+        if reply.from_user.id == (await app.get_me()).id:
+            responses = list(word_db.find({"word": message.text}))
+            if responses:
+                response = random.choice(responses)
+                if response["check"] == "sticker":
+                    await message.reply_sticker(response["text"])
+                else:
+                    await message.reply_text(response["text"])
+        else:
+            if message.text:
+                word_db.insert_one({"word": reply.text, "text": message.text, "check": "text"})
+            elif message.sticker:
+                word_db.insert_one({"word": reply.text, "text": message.sticker.file_id, "check": "sticker"})
 
 # Chatbot responder for private chats
-@nexichat.on_message(filters.text & filters.private & ~filters.bot)
+@nexichat.on_message((filters.text | filters.sticker) & filters.private & ~filters.bot)
 async def chatbot_private(client: Client, message: Message):
     # Check if the chatbot is enabled
-    chatbot_status = status_db.find_one({"chat_id": message.chat.id})
+    chatbot_status = chatbot_db.find_one({"chat_id": message.chat.id})
     if not chatbot_status or chatbot_status.get("status") == "disabled":
         return
 
-    # Generate a response using OpenAI GPT
-    gpt_response = await get_gpt_response(message.text)
-    
-    # Send the response with typing effect
-    await type_message_with_typing(client, message.chat.id, gpt_response)
+    await app.send_chat_action(message.chat.id, ChatAction.TYPING)
+
+    if not message.reply_to_message:
+        responses = list(word_db.find({"word": message.text}))
+        if responses:
+            response = random.choice(responses)
+            if response["check"] == "sticker":
+                await message.reply_sticker(response["text"])
+            else:
+                await message.reply_text(response["text"])
+    else:
+        reply = message.reply_to_message
+        if reply.from_user.id == (await app.get_me()).id:
+            responses = list(word_db.find({"word": message.text}))
+            if responses:
+                response = random.choice(responses)
+                if response["check"] == "sticker":
+                    await message.reply_sticker(response["text"])
+                else:
+                    await message.reply_text(response["text"])
+        else:
+            if message.text:
+                word_db.insert_one({"word": reply.text, "text": message.text, "check": "text"})
+            elif message.sticker:
+                word_db.insert_one({"word": reply.text, "text": message.sticker.file_id, "check": "sticker"})
