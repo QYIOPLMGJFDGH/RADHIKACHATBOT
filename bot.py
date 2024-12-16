@@ -52,7 +52,7 @@ async def handle_message(client, message):
         await message.reply("Sorry, something went wrong. Please try again later.")
 
 # Create and run the client
-app = Client("my_bot", bot_token=bot_token)
+app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
 # Add message handler to respond to incoming messages
 app.add_handler(filters.text, handle_message)
