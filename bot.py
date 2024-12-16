@@ -1,6 +1,7 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, filters, CallbackContext
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackContext
+from telegram.ext import filters  # Corrected import statement
 import torch
 import logging
 
@@ -30,7 +31,7 @@ def generate_response(user_input: str):
     return bot_reply
 
 # Function to handle messages from users
-def reply(update: Update, context: CallbackContext):
+async def reply(update: Update, context: CallbackContext):
     user_message = update.message.text  # Get the text from the user message
     chat_id = update.message.chat_id  # Get the chat ID
 
@@ -43,24 +44,23 @@ def reply(update: Update, context: CallbackContext):
         logger.info(f"Bot response: {bot_response}")
 
         # Send the bot's response back to the user
-        update.message.reply_text(bot_response)
+        await update.message.reply_text(bot_response)
 
     except Exception as e:
         # If there's an error, log it and send a generic response
         logger.error(f"Error occurred: {str(e)}")
-        update.message.reply_text("Sorry, something went wrong. Please try again later.")
+        await update.message.reply_text("Sorry, something went wrong. Please try again later.")
 
 # Main function to run the bot
 def main():
-    # Create an Updater object and provide the bot's token
-    updater = Updater(TELEGRAM_BOT_TOKEN, use_context=True)
+    # Create an Application object and provide the bot's token (using the new API)
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
     # Register a message handler for text messages (any text messages except commands)
-    updater.dispatcher.add_handler(MessageHandler(filters.text & ~filters.command, reply))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, reply))
 
     # Start polling to get updates from Telegram
-    updater.start_polling()
-    updater.idle()
+    application.run_polling()
 
 if __name__ == "__main__":
     main()
