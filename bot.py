@@ -1,6 +1,6 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters, CallbackContext
 import torch
 import logging
 
@@ -56,7 +56,7 @@ def main():
     updater = Updater(TELEGRAM_BOT_TOKEN, use_context=True)
 
     # Register a message handler for text messages (any text messages except commands)
-    updater.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, reply))
+    updater.dispatcher.add_handler(MessageHandler(filters.text & ~filters.command, reply))
 
     # Start polling to get updates from Telegram
     updater.start_polling()
