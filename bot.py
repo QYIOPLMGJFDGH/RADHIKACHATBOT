@@ -1,11 +1,12 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from telegram.ext import Application, MessageHandler, CallbackContext, filters
-from telegram import Update
+from pyrogram import Client, filters
 import torch
 import logging
 
-# Telegram Bot Token (BotFather se milta hai)
-TELEGRAM_BOT_TOKEN = "7638229482:AAFBhF1jSnHqpTaQlpIx3YDfcksl_iqipFc"  # Yahan apna bot token daalein
+# Telegram API credentials (replace with your own)
+api_id = "16457832"  # Your API ID
+api_hash = "3030874d0befdb5d05597deacc3e83ab"  # Your API Hash
+bot_token = "7638229482:AAFBhF1jSnHqpTaQlpIx3YDfcksl_iqipFc"  # Your Bot Token from BotFather
 
 # Load Hugging Face model
 model_name = "microsoft/DialoGPT-medium"
@@ -30,9 +31,9 @@ def generate_response(user_input: str):
     return bot_reply
 
 # Function to handle incoming messages and generate response
-async def handle_messages(update: Update, context: CallbackContext):
-    user_message = update.message.text  # Get the text from the user message
-    chat_id = update.message.chat_id  # Get the chat ID
+async def handle_message(client, message):
+    user_message = message.text  # Get the text from the user message
+    chat_id = message.chat.id  # Get the chat ID
 
     # Log the user input for debugging
     logger.info(f"Received message from {chat_id}: {user_message}")
@@ -43,25 +44,19 @@ async def handle_messages(update: Update, context: CallbackContext):
         logger.info(f"Bot response: {bot_response}")
 
         # Send the bot's response back to the user
-        await context.bot.send_message(chat_id, bot_response)
+        await message.reply(bot_response)
 
     except Exception as e:
         # If there's an error, log it and send a generic response
         logger.error(f"Error occurred: {str(e)}")
-        await context.bot.send_message(chat_id, "Sorry, something went wrong. Please try again later.")
+        await message.reply("Sorry, something went wrong. Please try again later.")
 
-# Main function to run the bot
-async def main():
-    # Create the application object
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+# Create and run the client
+app = Client("my_bot", bot_token=bot_token)
 
-    # Register the message handler to reply to incoming messages
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
+# Add message handler to respond to incoming messages
+app.add_handler(filters.text, handle_message)
 
-    # Start polling to get updates from Telegram
-    await application.run_polling()
-
+# Start the bot
 if __name__ == "__main__":
-    # Run the bot without using asyncio.run()
-    import asyncio
-    asyncio.run(main())
+    app.run()
