@@ -30,7 +30,11 @@ def generate_response(user_input: str):
     bot_reply = tokenizer.decode(bot_output[:, input_ids.shape[-1]:][0], skip_special_tokens=True)
     return bot_reply
 
-# Function to handle incoming messages and generate response
+# Initialize the Pyrogram client
+app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
+
+# Handle incoming messages
+@app.on_message(filters.text)
 async def handle_message(client, message):
     user_message = message.text  # Get the text from the user message
     chat_id = message.chat.id  # Get the chat ID
@@ -50,12 +54,6 @@ async def handle_message(client, message):
         # If there's an error, log it and send a generic response
         logger.error(f"Error occurred: {str(e)}")
         await message.reply("Sorry, something went wrong. Please try again later.")
-
-# Create and run the client
-app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
-
-# Add message handler to respond to incoming messages
-app.add_handler(filters.text, handle_message)
 
 # Start the bot
 if __name__ == "__main__":
