@@ -3,7 +3,6 @@ from telegram.ext import Application, MessageHandler, CallbackContext, filters, 
 import torch
 import logging
 import asyncio
-from telegram.chat import Chat
 
 # Telegram Bot Token (BotFather se milta hai)
 TELEGRAM_BOT_TOKEN = "7638229482:AAFBhF1jSnHqpTaQlpIx3YDfcksl_iqipFc"  # Yahan apna bot token daalein
