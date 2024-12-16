@@ -8,6 +8,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from pyrogram.types import CallbackQuery
 from pyrogram.enums import ChatMemberStatus as CMS
 import config
+import openai
 from nexichat import nexichat
 from nexichat import mongo, db, LOGGER
 
