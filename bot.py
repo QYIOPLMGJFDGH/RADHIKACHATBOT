@@ -1,11 +1,9 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from telegram import Update
-from telegram.ext import Application, MessageHandler, CallbackContext
-from telegram.ext import filters
+from telegram import Bot
+from telegram.ext import Application, MessageHandler, CallbackContext, filters, Update
 import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
 import logging
 import asyncio
-from telegram import Bot
 
 # Telegram Bot Token (BotFather se milta hai)
 TELEGRAM_BOT_TOKEN = "7638229482:AAFBhF1jSnHqpTaQlpIx3YDfcksl_iqipFc"  # Yahan apna bot token daalein
