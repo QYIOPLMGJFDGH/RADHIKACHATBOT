@@ -3,7 +3,6 @@ from telegram.ext import Application, MessageHandler, CallbackContext, filters
 from telegram import Update
 import torch
 import logging
-import asyncio
 
 # Telegram Bot Token (BotFather se milta hai)
 TELEGRAM_BOT_TOKEN = "7638229482:AAFBhF1jSnHqpTaQlpIx3YDfcksl_iqipFc"  # Yahan apna bot token daalein
@@ -65,6 +64,4 @@ async def main():
 if __name__ == "__main__":
     # Run the bot without using asyncio.run()
     import asyncio
-    loop = asyncio.get_event_loop()
-    loop.create_task(main())
-    loop.run_forever()
+    asyncio.run(main())
