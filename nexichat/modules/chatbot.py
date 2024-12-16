@@ -12,6 +12,9 @@ import openai
 from nexichat import nexichat
 from nexichat import mongo, db, LOGGER
 
+client = MongoClient(config.MONGO_URL)  # Mongo URI from config
+db = client["chatbot_db"]  # Name of your database, can be changed if needed
+status_db = db["status"]  # Collection name for storing chatbot status
 # OpenAI API key setup
 openai.api_key = ""
 
