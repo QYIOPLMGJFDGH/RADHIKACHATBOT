@@ -5,15 +5,14 @@ from pyrogram import Client, filters
 
 
 START = """<pre>🐰⃟⃞⍣Rᴀᴅʜɪᴋᴀ❥ Cʟᴏɴᴇᦔ Bᴏᴛ ❥</pre>
-<pre><code class="language-➥ ᴇɴᴀʙʟᴇᴅ/ᴅɪꜱᴀʙʟᴇᴅ ʙʏ /chatbot">➥ ᴄʟᴏɴᴇ ʙʏ /clone</code></pre>
-<blockquote expandable>
-╔═════════════════╗<br>
-║⥂ ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ ⬀ <b>{}</b><br>
-║⥂ ᴛᴏᴛᴀʟ ᴄʜᴀᴛꜱ ⬀ <b>{}</b><br>
-║⥂ ᴜᴘᴛɪᴍᴇ ⬀ <b>{}</b><br>               
-╚═════════════════╝
-</blockquote>
+<pre><code>➥ ᴇɴᴀʙʟᴇᴅ/ᴅɪꜱᴀʙʟᴇᴅ ʙʏ /chatbot</code></pre>
+<b>═════════════════</b><br>
+<b>⥂ ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ ⬀ <b>{}</b></b><br>
+<b>⥂ ᴛᴏᴛᴀʟ ᴄʜᴀᴛꜱ ⬀ <b>{}</b></b><br>
+<b>⥂ ᴜᴘᴛɪᴍᴇ ⬀ <b>{}</b></b><br>
+<b>═════════════════</b>
 """
+
 
 
 
