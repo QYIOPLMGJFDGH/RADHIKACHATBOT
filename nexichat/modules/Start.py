@@ -271,7 +271,11 @@ async def start(_, m: Message):
         users = len(await get_served_users())
         chats = len(await get_served_chats())
         UP, CPU, RAM, DISK = await bot_sys_stats()
-        formatted_text = html.escape(START.format(users, chats, UP))
+        formatted_text = START.format(users, chats, UP)
+
+# Escape any special characters to ensure HTML compatibility
+        formatted_text = html.escape(formatted_text)
+
 
         # Send the bot's stats formatted with HTML
         await m.reply_text( 
