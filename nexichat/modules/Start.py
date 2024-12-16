@@ -3,6 +3,7 @@ import logging
 import time
 from pathlib import Path
 import os
+import html
 import time
 import io
 import psutil
@@ -270,10 +271,11 @@ async def start(_, m: Message):
         users = len(await get_served_users())
         chats = len(await get_served_chats())
         UP, CPU, RAM, DISK = await bot_sys_stats()
+        formatted_text = html.escape(START.format(users, chats, UP))
 
         # Send the bot's stats formatted with HTML
         await m.reply_text( 
-            text=START.format(users, chats, UP), 
+            text=formatted_text, 
             reply_markup=InlineKeyboardMarkup(START_BOT),
             parse_mode="html"  # This ensures the HTML formatting is applied
         )
