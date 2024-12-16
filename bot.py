@@ -63,5 +63,8 @@ async def main():
     await application.run_polling()
 
 if __name__ == "__main__":
-    # Run the main function with asyncio.run
-    asyncio.run(main())
+    # Run the bot without using asyncio.run()
+    import asyncio
+    loop = asyncio.get_event_loop()
+    loop.create_task(main())
+    loop.run_forever()
