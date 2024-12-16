@@ -1,6 +1,5 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from telegram import Bot
-from telegram.ext import Application, MessageHandler, CallbackContext, filters, Update  # Corrected import
+from telegram.ext import Application, MessageHandler, CallbackContext, filters, Update
 import torch
 import logging
 import asyncio
@@ -31,7 +30,7 @@ def generate_response(user_input: str):
     return bot_reply
 
 # Function to handle incoming messages and generate response
-async def handle_messages(client, update: Update):
+async def handle_messages(update: Update, context: CallbackContext):
     user_message = update.message.text  # Get the text from the user message
     chat_id = update.message.chat_id  # Get the chat ID
 
@@ -44,23 +43,23 @@ async def handle_messages(client, update: Update):
         logger.info(f"Bot response: {bot_response}")
 
         # Send the bot's response back to the user
-        await client.send_message(chat_id, bot_response)
+        await context.bot.send_message(chat_id, bot_response)
 
     except Exception as e:
         # If there's an error, log it and send a generic response
         logger.error(f"Error occurred: {str(e)}")
-        await client.send_message(chat_id, "Sorry, something went wrong. Please try again later.")
+        await context.bot.send_message(chat_id, "Sorry, something went wrong. Please try again later.")
 
 # Main function to run the bot
 async def main():
-    # Initialize the Telegram client
-    client = Bot(token=TELEGRAM_BOT_TOKEN)
+    # Create the application object
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
     # Register the message handler to reply to incoming messages
-    client.add_handler(MessageHandler(filters.TEXT, handle_messages))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
 
-    # Start the bot
-    await client.start_polling()
+    # Start polling to get updates from Telegram
+    await application.run_polling()
 
 if __name__ == "__main__":
     asyncio.run(main())
