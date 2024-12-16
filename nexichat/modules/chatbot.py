@@ -18,15 +18,16 @@ status_db = db["status"]  # Collection name for storing chatbot status
 # OpenAI API key setup
 openai.api_key = config.OPENAI  # Set the API key from config
 
-# Function to generate response from ChatGPT
+
 async def get_gpt_response(message_text):
     response = openai.Completion.create(
-        engine="text-davinci-003",  # Use your preferred GPT model
+        model="gpt-3.5-turbo",  # Updated model
         prompt=message_text,
         max_tokens=150,
         temperature=0.7
     )
     return response.choices[0].text.strip()
+
 
 # Function to simulate typing each word individually
 async def type_message_with_typing(client: Client, chat_id: int, message_text: str):
