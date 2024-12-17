@@ -1,5 +1,4 @@
 import os
-import re
 import random
 from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid, ReactionInvalid
 from random import choice
@@ -15,8 +14,8 @@ mongo_client = MongoClient(MONGO_DB_URI)
 chatbot_db = mongo_client["VickDb"]["Vick"]  # Stores chatbot status (enabled/disabled)
 word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
-db = mongo_client['bot_db']  # Database name
-reactions_collection = db['reactions']  # Collection to store reaction status
+locked_words_db = mongo_client["LockedWords"]["Words"]  # Stores locked words
+BOT_OWNER_ID = "7400383704"
 
 # Command to disable the chatbot (works for all users in both private and group chats)
 @nexichat.on_message(filters.command(["chatbot off"], prefixes=["/"]))
@@ -92,6 +91,64 @@ async def chatbot_usage(client, message: Message):
 UNWANTED_MESSAGE_REGEX = r"^[\W_]+$|[\/!?\~\\]"
 
 # Chatbot responder for group chats
+@nexichat.on_message(filters.command(["lock"], prefixes=["/"]))
+async def lock_word(client, message: Message):
+    # Get the word from the message
+    if len(message.text.split()) < 2:
+        await message.reply_text("Please provide a word to lock. Example: /lock xxx")
+        return
+
+    word_to_lock = message.text.split()[1]
+    user_id = message.from_user.id
+
+    # Send a private message to the bot owner with an inline keyboard
+    owner_message = await client.send_message(
+        BOT_OWNER_ID,
+        f"User {message.from_user.mention} has requested to lock the word '{word_to_lock}'.",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("Accept", callback_data=f"accept_{word_to_lock}_{user_id}"),
+             InlineKeyboardButton("Decline", callback_data=f"decline_{word_to_lock}_{user_id}")]
+        ])
+    )
+
+    # Notify the user that their request has been sent to the owner
+    await message.reply_text(f"Your request to lock the word '{word_to_lock}' has been sent to the bot owner.")
+
+# Handle the owner's response (Accept or Decline)
+@nexichat.on_callback_query()
+async def handle_lock_request(client, callback_query):
+    # Extract the word and user_id from the callback data
+    callback_data = callback_query.data
+    action, word_to_lock, user_id = callback_data.split('_')
+    user_id = int(user_id)  # Convert user_id back to int
+
+    # If it's the owner who clicked
+    if callback_query.from_user.id == BOT_OWNER_ID:
+        if action == "accept":
+            # Lock the word by adding it to the database
+            locked_words_db.insert_one({"word": word_to_lock})
+            await callback_query.answer(f"Word '{word_to_lock}' has been locked.")
+            await callback_query.message.edit_text(f"Word '{word_to_lock}' has been locked by the owner.")
+            
+            # Notify the user in the same chat where they requested
+            user_message = await client.send_message(
+                user_id,
+                f"Your request to lock the word '{word_to_lock}' has been **accepted** and locked by the bot owner."
+            )
+        elif action == "decline":
+            await callback_query.answer(f"Request to lock the word '{word_to_lock}' has been declined.")
+            await callback_query.message.edit_text(f"Request to lock the word '{word_to_lock}' has been declined.")
+            
+            # Notify the user in the same chat where they requested
+            user_message = await client.send_message(
+                user_id,
+                f"Your request to lock the word '{word_to_lock}' has been **declined** by the bot owner."
+            )
+    else:
+        # If the owner is not the one who clicked, send an error message
+        await callback_query.answer("You are not authorized to perform this action.")
+
+# Chatbot responder for group chats
 @nexichat.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
 async def chatbot_responder(client: Client, message: Message):
     # Filter out unwanted messages
@@ -104,6 +161,11 @@ async def chatbot_responder(client: Client, message: Message):
     chatbot_status = chatbot_db.find_one({"chat_id": chat_id})
     if not chatbot_status or chatbot_status.get("status") == "disabled":
         return
+
+    # Check if the word is locked
+    locked_word = locked_words_db.find_one({"word": message.text})
+    if locked_word:
+        return  # Don't reply if the word is locked
 
     await nexichat.send_chat_action(chat_id, ChatAction.TYPING)
 
@@ -143,6 +205,11 @@ async def chatbot_private(client: Client, message: Message):
     if not chatbot_status or chatbot_status.get("status") == "disabled":
         return
 
+    # Check if the word is locked
+    locked_word = locked_words_db.find_one({"word": message.text})
+    if locked_word:
+        return  # Don't reply if the word is locked
+
     await nexichat.send_chat_action(message.chat.id, ChatAction.TYPING)
 
     if not message.reply_to_message:
@@ -168,62 +235,3 @@ async def chatbot_private(client: Client, message: Message):
                 word_db.insert_one({"word": reply.text, "text": message.text, "check": "text"})
             elif message.sticker:
                 word_db.insert_one({"word": reply.text, "text": message.sticker.file_id, "check": "sticker"})
-
-
-
-# List of emojis
-EMOJIS = [
-    "👍", "👎", "❤", "🔥", "🥰", "👏", "😁", "🤔", "🤯", "😱", "🤬", "😢", "🎉", "🤩", "🤮", "💩", "🙏", "👌", "🕊", "🤡", 
-    "🥱", "🥴", "😍", "🐳", "❤‍🔥", "🌚", "🌭", "💯", "🤣", "⚡", "🍌", "🏆", "💔", "🤨", "😐", "🍓", "🍾", "💋", "🖕", "😈", 
-    "😴", "😭", "🤓", "👻", "👨‍💻", "👀", "🎃", "🙈", "😇", "😨", "🤝", "✍", "🤗", "🫡", "🎅", "🎄", "☃", "💅", "🤪", "🗿", 
-    "🆒", "💘", "🙉", "🦄", "😘", "💊", "🙊", "😎", "👾", "🤷‍♂", "🤷", "🤷‍♀", "😡"
-]
-
-
-
-# Function to get the current reaction status from MongoDB
-def get_reaction_status():
-    status = reactions_collection.find_one({"_id": "reaction_status"})
-    return status["enabled"] if status else False
-
-# Function to set the reaction status in MongoDB
-def set_reaction_status(enabled: bool):
-    reactions_collection.update_one(
-        {"_id": "reaction_status"},
-        {"$set": {"enabled": enabled}},
-        upsert=True
-    )
-
-# Prefix for commands
-COMMAND_PREFIX = "/reaction"
-
-# Command to enable reactions
-@nexichat.on_message(filters.command(f"{COMMAND_PREFIX} on"))
-async def reaction_on(_, msg: Message):
-    set_reaction_status(True)
-    await msg.reply("𓌉◯𓇋 Rᴇᴀᴄᴛɪᴏɴ ᴍᴏᴅᴇ ᴀᴄᴛɪᴠᴇᴛᴇᴅ ☑")
-
-# Command to turn reactions off
-@nexichat.on_message(filters.command(f"{COMMAND_PREFIX} off"))
-async def reaction_off(_, msg: Message):
-    set_reaction_status(False)
-    await msg.reply("𓌉◯𓇋 Rᴇᴀᴄᴛɪᴏɴ ᴍᴏᴅᴇ ᴅᴇᴀᴄᴛɪᴠᴇᴛᴇᴅ ☒")
-
-# Command to guide the user when they enter /reaction and show current status
-@nexichat.on_message(filters.command(f"{COMMAND_PREFIX}"))
-async def guide_reaction(_, msg: Message):
-    # Get the current reaction status
-    status = get_reaction_status()
-    status_message = "enabled" if status else "disabled"
-    await msg.reply(f"⑈ Rᴇᴀᴄᴛɪᴏɴs ᴀʀᴇ ᴄᴜʀʀᴇɴᴛʟʏ ↳{status_message}.\n\n➥ {COMMAND_PREFIX} `on` - To ᴇɴᴀʙʟᴇ ʀᴇᴀᴄᴛɪᴏɴs\n➥ {COMMAND_PREFIX} `off` - Tᴏ ᴅɪsᴀʙʟᴇ ʀᴇᴀᴄᴛɪᴏɴs")
-
-# Define message reaction logic
-@nexichat.on_message(filters.all)
-async def send_reaction(_, msg: Message):
-    # Check if reactions are enabled
-    if get_reaction_status():
-        try:
-            await msg.react(choice(EMOJIS))
-        except (MessageIdInvalid, EmoticonInvalid, ChatAdminRequired, ReactionInvalid):
-            pass
-
