@@ -1,6 +1,7 @@
 import os
 import re
 import random
+from pyrogram.enums import ParseMode
 from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid, ReactionInvalid
 from random import choice
 from pyrogram import Client, filters
@@ -91,10 +92,11 @@ async def chatbot_usage(client, message: Message):
 # Regular expression to filter unwanted messages containing special characters like /, !, ?, ~, \
 UNWANTED_MESSAGE_REGEX = r"^[\W_]+$|[\/!?\~\\]"
 
-# Chatbot responder for group chats
+
+# Command to request word lock
 @nexichat.on_message(filters.command(["lock"], prefixes=["/"]))
 async def lock_word(client, message: Message):
-    # Get the word from the message
+    # Check if the command has a word to lock
     if len(message.text.split()) < 2:
         await message.reply_text("Please provide a word to lock. Example: /lock xxx")
         return
@@ -102,56 +104,57 @@ async def lock_word(client, message: Message):
     word_to_lock = message.text.split()[1]
     user_id = message.from_user.id
 
-    # Send a private message to the bot owner with an inline keyboard
-    owner_message = await client.send_message(
+    # Send a request to the bot owner with inline buttons
+    await client.send_message(
         BOT_OWNER_ID,
-        f"User {message.from_user.mention} has requested to lock the word '{word_to_lock}'.",
+        f"User {message.from_user.mention(style='md')} has requested to lock the word: **'{word_to_lock}'**.\n\nUser ID: `{user_id}`",
+        parse_mode=ParseMode.MARKDOWN,
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("Accept", callback_data="accept"),
-             InlineKeyboardButton("Decline", callback_data="decline")]
+            [InlineKeyboardButton("Accept", callback_data=f"accept:{word_to_lock}:{user_id}"),
+             InlineKeyboardButton("Decline", callback_data=f"decline:{word_to_lock}:{user_id}")]
         ])
     )
 
-    # Notify the user that their request has been sent to the owner
+    # Notify the user about the request
     await message.reply_text(f"Your request to lock the word '{word_to_lock}' has been sent to the bot owner.")
 
-# Handle the owner's response (Accept or Decline)
+# Callback handler for buttons
 @nexichat.on_callback_query()
-async def handle_lock_request(client, callback_query):
-    # Extract action from callback_data
-    action = callback_query.data
+async def handle_lock_request(client, callback_query: CallbackQuery):
+    try:
+        # Extract action, word, and user_id from callback_data
+        action, word_to_lock, user_id = callback_query.data.split(":")
+        user_id = int(user_id)  # Convert user_id to integer
 
-    # If it's the owner who clicked
-    if callback_query.from_user.id == BOT_OWNER_ID:
-        # Fetch the original message text to extract details
-        owner_message_text = callback_query.message.text
-        word_to_lock = owner_message_text.split("'")[1]
-        user_mention = owner_message_text.split()[1]
-        user_id = int(owner_message_text.split()[-1][1:-1])
+        # Check if the owner clicked the button
+        if callback_query.from_user.id == BOT_OWNER_ID:
+            if action == "accept":
+                # Add the word to the database
+                locked_words_db.insert_one({"word": word_to_lock})
+                
+                # Notify owner and user
+                await callback_query.answer(f"Word '{word_to_lock}' has been locked.")
+                await callback_query.message.edit_text(f"The word '{word_to_lock}' has been locked by the owner.")
+                await client.send_message(
+                    user_id,
+                    f"Your request to lock the word '{word_to_lock}' has been **accepted** by the bot owner."
+                )
+            elif action == "decline":
+                # Notify owner and user
+                await callback_query.answer(f"Request to lock the word '{word_to_lock}' has been declined.")
+                await callback_query.message.edit_text(f"The request to lock '{word_to_lock}' has been declined by the owner.")
+                await client.send_message(
+                    user_id,
+                    f"Your request to lock the word '{word_to_lock}' has been **declined** by the bot owner."
+                )
+        else:
+            # If the user clicking is not the owner
+            await callback_query.answer("You are not authorized to perform this action.", show_alert=True)
+    except Exception as e:
+        # Log any errors
+        print(f"Error handling callback: {e}")
+        await callback_query.answer("An error occurred while processing your request.", show_alert=True)
 
-        if action == "accept":
-            # Lock the word by adding it to the database
-            locked_words_db.insert_one({"word": word_to_lock})
-            await callback_query.answer(f"Word '{word_to_lock}' has been locked.")
-            await callback_query.message.edit_text(f"Word '{word_to_lock}' has been locked by the owner.")
-
-            # Notify the user in the same chat where they requested
-            await client.send_message(
-                user_id,
-                f"Your request to lock the word '{word_to_lock}' has been **accepted** and locked by the bot owner."
-            )
-        elif action == "decline":
-            await callback_query.answer(f"Request to lock the word '{word_to_lock}' has been declined.")
-            await callback_query.message.edit_text(f"Request to lock the word '{word_to_lock}' has been declined.")
-
-            # Notify the user in the same chat where they requested
-            await client.send_message(
-                user_id,
-                f"Your request to lock the word '{word_to_lock}' has been **declined** by the bot owner."
-            )
-    else:
-        # If the owner is not the one who clicked, send an error message
-        await callback_query.answer("You are not authorized to perform this action.", show_alert=True)
 
 
 # Chatbot responder for group chats
