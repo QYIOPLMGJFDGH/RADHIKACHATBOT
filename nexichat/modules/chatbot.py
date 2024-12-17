@@ -17,7 +17,7 @@ chatbot_db = mongo_client["VickDb"]["Vick"]  # Stores chatbot status (enabled/di
 word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
 locked_words_db = []  # Stores locked words
-BOT_OWNER_ID = "7400383704"
+BOT_OWNER_ID = 7400383704
 
 # Command to disable the chatbot (works for all users in both private and group chats)
 @nexichat.on_message(filters.command(["chatbot off"], prefixes=["/"]))
@@ -96,7 +96,6 @@ UNWANTED_MESSAGE_REGEX = r"^[\W_]+$|[\/!?\~\\]"
 # Command to request word lock
 @nexichat.on_message(filters.command(["lock"], prefixes=["/"]))
 async def lock_word(client, message: Message):
-    # Check if the command has a word to lock
     if len(message.text.split()) < 2:
         await message.reply_text("Please provide a word to lock. Example: /lock xxx")
         return
@@ -104,18 +103,17 @@ async def lock_word(client, message: Message):
     word_to_lock = message.text.split()[1]
     user_id = message.from_user.id
 
-    # Send a request to the bot owner with inline buttons
     await nexichat.send_message(
         BOT_OWNER_ID,
         f"User {message.from_user.mention(style='md')} has requested to lock the word: **'{word_to_lock}'**.\n\nUser ID: `{user_id}`",
         parse_mode=ParseMode.MARKDOWN,
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("Accept", callback_data=f"accept:{word_to_lock}:{user_id}"),
-             InlineKeyboardButton("Decline", callback_data=f"decline:{word_to_lock}:{user_id}")]
+            [
+                InlineKeyboardButton("Accept", callback_data=f"accept:{word_to_lock}:{user_id}"),
+                InlineKeyboardButton("Decline", callback_data=f"decline:{word_to_lock}:{user_id}")
+            ]
         ])
     )
-
-    # Notify the user about the request
     await message.reply_text(f"Your request to lock the word '{word_to_lock}' has been sent to the bot owner.")
 
 # Callback handler for buttons
@@ -123,40 +121,36 @@ async def lock_word(client, message: Message):
 async def handle_lock_request(client, callback_query: CallbackQuery):
     try:
         data = callback_query.data
+
         if ":" in data:
             action, word_to_lock, user_id = data.split(":")
-            user_id = int(user_id)  # Convert user_id to integer
+            user_id = int(user_id)
 
-            # If the bot owner clicks the button
             if callback_query.from_user.id == BOT_OWNER_ID:
                 if action == "accept":
-                    # Add the word to the database
-                    locked_words_db.append({"word": word_to_lock})  # Replace with your actual DB logic
+                    locked_words_db.append({"word": word_to_lock})
 
-                    # Notify owner and user
                     await callback_query.answer(f"Word '{word_to_lock}' has been locked.", show_alert=True)
-                    await callback_query.message.edit_text(f"The word '{word_to_lock}' has been locked by the owner.")
+                    await callback_query.message.edit_text(f"The word '{word_to_lock}' has been locked.")
                     await nexichat.send_message(
                         user_id,
                         f"Your request to lock the word '{word_to_lock}' has been **accepted** by the bot owner."
                     )
                 elif action == "decline":
-                    # Notify owner and user
                     await callback_query.answer(f"Request to lock the word '{word_to_lock}' has been declined.", show_alert=True)
-                    await callback_query.message.edit_text(f"The request to lock '{word_to_lock}' has been declined by the owner.")
+                    await callback_query.message.edit_text(f"The request to lock '{word_to_lock}' has been declined.")
                     await nexichat.send_message(
                         user_id,
                         f"Your request to lock the word '{word_to_lock}' has been **declined** by the bot owner."
                     )
             else:
-                # If the user clicking is not the owner
                 await callback_query.answer("You are not authorized to perform this action.", show_alert=True)
         else:
             await callback_query.answer("Invalid callback data.", show_alert=True)
     except Exception as e:
-        # Log any errors
-        print(f"Error handling callback: {e}")
-        await callback_query.answer("An error occurred while processing your request.", show_alert=True)
+        print(f"Error: {e}")
+        await callback_query.answer("An error occurred.", show_alert=True)
+
 
 
 
