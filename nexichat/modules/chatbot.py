@@ -194,25 +194,28 @@ def set_reaction_status(enabled: bool):
         upsert=True
     )
 
-# Command to turn reactions on
-@nexichat.on_message(filters.command("reaction on"))
+# Prefix for commands
+COMMAND_PREFIX = "/reaction"
+
+# Command to enable reactions
+@nexichat.on_message(filters.command(f"{COMMAND_PREFIX} on"))
 async def reaction_on(_, msg: Message):
     set_reaction_status(True)
-    await msg.reply("𓌉◯𓇋 Rᴇᴀᴄᴛɪᴏɴ ᴍᴏᴅᴇ ᴀᴄᴛɪᴠɪᴛᴇᴅ ☑")
+    await msg.reply("𓌉◯𓇋 Rᴇᴀᴄᴛɪᴏɴ ᴍᴏᴅᴇ ᴀᴄᴛɪᴠᴇᴛᴇᴅ ☑")
 
 # Command to turn reactions off
-@nexichat.on_message(filters.command("reaction off"))
+@nexichat.on_message(filters.command(f"{COMMAND_PREFIX} off"))
 async def reaction_off(_, msg: Message):
     set_reaction_status(False)
-    await msg.reply("𓌉◯𓇋 Rᴇᴀᴄᴛɪᴏɴ ᴍᴏᴅᴇ ᴅᴇᴀᴄᴛɪᴠɪᴛᴇᴅ ☒")
+    await msg.reply("𓌉◯𓇋 Rᴇᴀᴄᴛɪᴏɴ ᴍᴏᴅᴇ ᴅᴇᴀᴄᴛɪᴠᴇᴛᴇᴅ ☒")
 
-# Command to guide the user when they enter `/reaction` and show current status
-@nexichat.on_message(filters.command("reaction"))
+# Command to guide the user when they enter /reaction and show current status
+@nexichat.on_message(filters.command(f"{COMMAND_PREFIX}"))
 async def guide_reaction(_, msg: Message):
     # Get the current reaction status
     status = get_reaction_status()
     status_message = "enabled" if status else "disabled"
-    await msg.reply(f"⑈ Rᴇᴀᴄᴛɪᴏɴs ᴀʀᴇ ᴄᴜʀʀᴇɴᴛʟʏ ↳{status_message}.\n\n➥ /reaction `on` - To ᴇɴᴀʙʟᴇ ʀᴇᴀᴄᴛɪᴏɴs\n➥ /reaction `off` - Tᴏ ᴅɪsᴀʙʟᴇ ʀᴇᴀᴄᴛɪᴏɴs")
+    await msg.reply(f"⑈ Rᴇᴀᴄᴛɪᴏɴs ᴀʀᴇ ᴄᴜʀʀᴇɴᴛʟʏ ↳{status_message}.\n\n➥ {COMMAND_PREFIX} `on` - To ᴇɴᴀʙʟᴇ ʀᴇᴀᴄᴛɪᴏɴs\n➥ {COMMAND_PREFIX} `off` - Tᴏ ᴅɪsᴀʙʟᴇ ʀᴇᴀᴄᴛɪᴏɴs")
 
 # Define message reaction logic
 @nexichat.on_message(filters.all)
