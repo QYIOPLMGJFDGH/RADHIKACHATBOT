@@ -1,4 +1,5 @@
 import os
+import re
 import random
 from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid, ReactionInvalid
 from random import choice
@@ -131,7 +132,7 @@ async def handle_lock_request(client, callback_query):
             await callback_query.message.edit_text(f"Word '{word_to_lock}' has been locked by the owner.")
             
             # Notify the user in the same chat where they requested
-            user_message = await client.send_message(
+            await client.send_message(
                 user_id,
                 f"Your request to lock the word '{word_to_lock}' has been **accepted** and locked by the bot owner."
             )
@@ -140,7 +141,7 @@ async def handle_lock_request(client, callback_query):
             await callback_query.message.edit_text(f"Request to lock the word '{word_to_lock}' has been declined.")
             
             # Notify the user in the same chat where they requested
-            user_message = await client.send_message(
+            await client.send_message(
                 user_id,
                 f"Your request to lock the word '{word_to_lock}' has been **declined** by the bot owner."
             )
