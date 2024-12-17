@@ -1,4 +1,5 @@
 import os
+import re
 import random
 from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid, ReactionInvalid
 from random import choice
@@ -86,9 +87,17 @@ async def chatbot_usage(client, message: Message):
         await message.reply_text(f"**Usage:**\n`/chatbot [on/off]`\n{status_message}\nChatbot commands only work in groups.")
 
 
+
+# Regular expression to filter unwanted messages containing special characters like /, !, ?, ~, \
+UNWANTED_MESSAGE_REGEX = r"^[\W_]+$|[\/!?\~\\]"
+
 # Chatbot responder for group chats
 @nexichat.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
 async def chatbot_responder(client: Client, message: Message):
+    # Filter out unwanted messages
+    if re.match(UNWANTED_MESSAGE_REGEX, message.text):
+        return
+
     chat_id = message.chat.id
 
     # Check if the chatbot is enabled
@@ -125,6 +134,10 @@ async def chatbot_responder(client: Client, message: Message):
 # Chatbot responder for private chats
 @nexichat.on_message((filters.text | filters.sticker) & filters.private & ~filters.bot)
 async def chatbot_private(client: Client, message: Message):
+    # Filter out unwanted messages
+    if re.match(UNWANTED_MESSAGE_REGEX, message.text):
+        return
+
     # Check if the chatbot is enabled
     chatbot_status = chatbot_db.find_one({"chat_id": message.chat.id})
     if not chatbot_status or chatbot_status.get("status") == "disabled":
