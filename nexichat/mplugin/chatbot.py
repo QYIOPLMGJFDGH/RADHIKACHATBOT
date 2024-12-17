@@ -1,6 +1,5 @@
 import random
 from pyrogram import Client, filters
-from nexichat import nexichat
 from pyrogram.types import Message
 from pyrogram.enums import ChatAction
 from pymongo import MongoClient
@@ -13,7 +12,7 @@ word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
 
 # Command to disable the chatbot (works for all users in both private and group chats)
-@nexichat.on_message(filters.command(["chatbot off"], prefixes=["/"]))
+@Client.on_message(filters.command(["chatbot off"], prefixes=["/"]))
 async def chatbot_off(client, message: Message):
     chat_id = message.chat.id
 
@@ -37,7 +36,7 @@ async def chatbot_off(client, message: Message):
         await message.reply_text("Chatbot Disabled in Group!")
 
 # Command to enable the chatbot (works in both private and group chats)
-@nexichat.on_message(filters.command(["chatbot on"], prefixes=["/"]))
+@Client.on_message(filters.command(["chatbot on"], prefixes=["/"]))
 async def chatbot_on(client, message: Message):
     chat_id = message.chat.id
 
@@ -61,7 +60,7 @@ async def chatbot_on(client, message: Message):
         await message.reply_text("Chatbot Enabled in Group!")
 
 # Command to display chatbot status (on/off) in private and group chats
-@nexichat.on_message(filters.command(["chatbot"], prefixes=["/"]))
+@Client.on_message(filters.command(["chatbot"], prefixes=["/"]))
 async def chatbot_usage(client, message: Message):
     chat_id = message.chat.id
 
@@ -82,7 +81,7 @@ async def chatbot_usage(client, message: Message):
 
 
 # Chatbot responder for group chats
-@nexichat.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
+@Client.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
 async def chatbot_responder(client: Client, message: Message):
     chat_id = message.chat.id
 
@@ -118,7 +117,7 @@ async def chatbot_responder(client: Client, message: Message):
                 word_db.insert_one({"word": reply.text, "text": message.sticker.file_id, "check": "sticker"})
 
 # Chatbot responder for private chats
-@nexichat.on_message((filters.text | filters.sticker) & filters.private & ~filters.bot)
+@Client.on_message((filters.text | filters.sticker) & filters.private & ~filters.bot)
 async def chatbot_private(client: Client, message: Message):
     # Check if the chatbot is enabled
     chatbot_status = chatbot_db.find_one({"chat_id": message.chat.id})
