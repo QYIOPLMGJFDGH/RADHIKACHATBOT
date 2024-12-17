@@ -16,7 +16,7 @@ mongo_client = MongoClient(MONGO_DB_URI)
 chatbot_db = mongo_client["VickDb"]["Vick"]  # Stores chatbot status (enabled/disabled)
 word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
-locked_words_db = mongo_client["LockedWords"]["Words"]  # Stores locked words
+locked_words_db = []  # Stores locked words
 BOT_OWNER_ID = "7400383704"
 
 # Command to disable the chatbot (works for all users in both private and group chats)
@@ -123,38 +123,41 @@ async def lock_word(client, message: Message):
 async def handle_lock_request(client, callback_query: CallbackQuery):
     try:
         # Extract action, word, and user_id from callback_data
-        action, word_to_lock, user_id = callback_query.data.split(":")
-        user_id = int(user_id)  # Convert user_id to integer
+        data = callback_query.data
+        if ":" in data:
+            action, word_to_lock, user_id = data.split(":")
+            user_id = int(user_id)  # Convert user_id to integer
 
-        # Check if the owner clicked the button
-        if callback_query.from_user.id == BOT_OWNER_ID:
-            if action == "accept":
-                # Add the word to the database
-                locked_words_db.insert_one({"word": word_to_lock})
-                
-                # Notify owner and user
-                await callback_query.answer(f"Word '{word_to_lock}' has been locked.")
-                await callback_query.message.edit_text(f"The word '{word_to_lock}' has been locked by the owner.")
-                await client.send_message(
-                    user_id,
-                    f"Your request to lock the word '{word_to_lock}' has been **accepted** by the bot owner."
-                )
-            elif action == "decline":
-                # Notify owner and user
-                await callback_query.answer(f"Request to lock the word '{word_to_lock}' has been declined.")
-                await callback_query.message.edit_text(f"The request to lock '{word_to_lock}' has been declined by the owner.")
-                await client.send_message(
-                    user_id,
-                    f"Your request to lock the word '{word_to_lock}' has been **declined** by the bot owner."
-                )
+            # Check if the owner clicked the button
+            if callback_query.from_user.id == BOT_OWNER_ID:
+                if action == "accept":
+                    # Add the word to the database
+                    locked_words_db.append({"word": word_to_lock})  # Replace with your actual DB logic
+                    
+                    # Notify owner and user
+                    await callback_query.answer(f"Word '{word_to_lock}' has been locked.")
+                    await callback_query.message.edit_text(f"The word '{word_to_lock}' has been locked by the owner.")
+                    await client.send_message(
+                        user_id,
+                        f"Your request to lock the word '{word_to_lock}' has been **accepted** by the bot owner."
+                    )
+                elif action == "decline":
+                    # Notify owner and user
+                    await callback_query.answer(f"Request to lock the word '{word_to_lock}' has been declined.")
+                    await callback_query.message.edit_text(f"The request to lock '{word_to_lock}' has been declined by the owner.")
+                    await client.send_message(
+                        user_id,
+                        f"Your request to lock the word '{word_to_lock}' has been **declined** by the bot owner."
+                    )
+            else:
+                # If the user clicking is not the owner
+                await callback_query.answer("You are not authorized to perform this action.", show_alert=True)
         else:
-            # If the user clicking is not the owner
-            await callback_query.answer("You are not authorized to perform this action.", show_alert=True)
+            await callback_query.answer("Invalid callback data.", show_alert=True)
     except Exception as e:
         # Log any errors
         print(f"Error handling callback: {e}")
         await callback_query.answer("An error occurred while processing your request.", show_alert=True)
-
 
 
 # Chatbot responder for group chats
