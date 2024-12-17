@@ -125,7 +125,7 @@ async def chatbot_private(client: Client, message: Message):
     if not chatbot_status or chatbot_status.get("status") == "disabled":
         return
 
-    await Client.send_chat_action(message.chat.id, ChatAction.TYPING)
+    await client.send_chat_action(message.chat.id, ChatAction.TYPING)
 
     if not message.reply_to_message:
         responses = list(word_db.find({"word": message.text}))
