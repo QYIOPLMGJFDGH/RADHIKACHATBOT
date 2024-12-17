@@ -119,35 +119,39 @@ async def lock_word(client, message: Message):
 async def handle_lock_request(client, callback_query: CallbackQuery):
     try:
         data = callback_query.data
-        if ":" in data:
-            action, word_to_lock, user_id = data.split(":")
-            user_id = int(user_id)
 
-            if callback_query.from_user.id == BOT_OWNER_ID:
-                if action == "accept":
-                    locked_words_db.update_one(
-                        {"word": word_to_lock},
-                        {"$set": {"word": word_to_lock}},
-                        upsert=True
-                    )
-                    await callback_query.message.edit_text(f"✅ The word '{word_to_lock}' has been locked.")
-                    await nexichat.send_message(
-                        chat_id=user_id,
-                        text=f"Your request to lock the word '{word_to_lock}' has been **accepted** by the bot owner."
-                    )
-                elif action == "decline":
-                    await callback_query.message.edit_text(f"❌ The request to lock '{word_to_lock}' has been declined.")
-                    await nexichat.send_message(
-                        chat_id=user_id,
-                        text=f"Your request to lock the word '{word_to_lock}' has been **declined** by the bot owner."
-                    )
-            else:
-                await callback_query.answer("You are not authorized to perform this action.", show_alert=True)
-        else:
+        if ":" not in data or len(data.split(":")) != 3:
             await callback_query.answer("Invalid callback data.", show_alert=True)
+            return
+
+        action, word_to_lock, user_id = data.split(":")
+        user_id = int(user_id)
+
+        if callback_query.from_user.id == BOT_OWNER_ID:
+            if action == "accept":
+                locked_words_db.update_one(
+                    {"word": word_to_lock},
+                    {"$set": {"word": word_to_lock}},
+                    upsert=True
+                )
+                await callback_query.message.edit_text(f"✅ The word '{word_to_lock}' has been locked.")
+                await nexichat.send_message(
+                    chat_id=user_id,
+                    text=f"Your request to lock the word '{word_to_lock}' has been **accepted** by the bot owner."
+                )
+            elif action == "decline":
+                await callback_query.message.edit_text(f"❌ The request to lock '{word_to_lock}' has been declined.")
+                await nexichat.send_message(
+                    chat_id=user_id,
+                    text=f"Your request to lock the word '{word_to_lock}' has been **declined** by the bot owner."
+                )
+            await callback_query.answer()
+        else:
+            await callback_query.answer("You are not authorized to perform this action.", show_alert=True)
     except Exception as e:
         print(f"Error handling callback: {e}")
         await callback_query.answer("An error occurred while processing the request.", show_alert=True)
+
 
 # Chatbot responder for group chats
 @nexichat.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
