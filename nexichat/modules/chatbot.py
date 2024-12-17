@@ -1,4 +1,7 @@
+import os
 import random
+from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid, ReactionInvalid
+from random import choice
 from pyrogram import Client, filters
 from nexichat import nexichat
 from pyrogram.types import Message
@@ -11,6 +14,8 @@ mongo_client = MongoClient(MONGO_DB_URI)
 chatbot_db = mongo_client["VickDb"]["Vick"]  # Stores chatbot status (enabled/disabled)
 word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
+db = mongo_client['bot_db']  # Database name
+reactions_collection = db['reactions']  # Collection to store reaction status
 
 # Command to disable the chatbot (works for all users in both private and group chats)
 @nexichat.on_message(filters.command(["chatbot off"], prefixes=["/"]))
@@ -91,7 +96,7 @@ async def chatbot_responder(client: Client, message: Message):
     if not chatbot_status or chatbot_status.get("status") == "disabled":
         return
 
-    await app.send_chat_action(chat_id, ChatAction.TYPING)
+    await nexichat.send_chat_action(chat_id, ChatAction.TYPING)
 
     if not message.reply_to_message:
         responses = list(word_db.find({"word": message.text}))
@@ -150,3 +155,59 @@ async def chatbot_private(client: Client, message: Message):
                 word_db.insert_one({"word": reply.text, "text": message.text, "check": "text"})
             elif message.sticker:
                 word_db.insert_one({"word": reply.text, "text": message.sticker.file_id, "check": "sticker"})
+
+
+
+# List of emojis
+EMOJIS = [
+    "👍", "👎", "❤", "🔥", "🥰", "👏", "😁", "🤔", "🤯", "😱", "🤬", "😢", "🎉", "🤩", "🤮", "💩", "🙏", "👌", "🕊", "🤡", 
+    "🥱", "🥴", "😍", "🐳", "❤‍🔥", "🌚", "🌭", "💯", "🤣", "⚡", "🍌", "🏆", "💔", "🤨", "😐", "🍓", "🍾", "💋", "🖕", "😈", 
+    "😴", "😭", "🤓", "👻", "👨‍💻", "👀", "🎃", "🙈", "😇", "😨", "🤝", "✍", "🤗", "🫡", "🎅", "🎄", "☃", "💅", "🤪", "🗿", 
+    "🆒", "💘", "🙉", "🦄", "😘", "💊", "🙊", "😎", "👾", "🤷‍♂", "🤷", "🤷‍♀", "😡"
+]
+
+
+
+# Function to get the current reaction status from MongoDB
+def get_reaction_status():
+    status = reactions_collection.find_one({"_id": "reaction_status"})
+    return status["enabled"] if status else False
+
+# Function to set the reaction status in MongoDB
+def set_reaction_status(enabled: bool):
+    reactions_collection.update_one(
+        {"_id": "reaction_status"},
+        {"$set": {"enabled": enabled}},
+        upsert=True
+    )
+
+# Command to turn reactions on
+@nexichat.on_message(filters.command("reaction on"))
+async def reaction_on(_, msg: Message):
+    set_reaction_status(True)
+    await msg.reply("𓌉◯𓇋 Rᴇᴀᴄᴛɪᴏɴ ᴍᴏᴅᴇ ᴀᴄᴛɪᴠɪᴛᴇᴅ ☑")
+
+# Command to turn reactions off
+@nexichat.on_message(filters.command("reaction off"))
+async def reaction_off(_, msg: Message):
+    set_reaction_status(False)
+    await msg.reply("𓌉◯𓇋 Rᴇᴀᴄᴛɪᴏɴ ᴍᴏᴅᴇ ᴅᴇᴀᴄᴛɪᴠɪᴛᴇᴅ ☒")
+
+# Command to guide the user when they enter `/reaction` and show current status
+@nexichat.on_message(filters.command("reaction"))
+async def guide_reaction(_, msg: Message):
+    # Get the current reaction status
+    status = get_reaction_status()
+    status_message = "enabled" if status else "disabled"
+    await msg.reply(f"⑈ Rᴇᴀᴄᴛɪᴏɴs ᴀʀᴇ ᴄᴜʀʀᴇɴᴛʟʏ ↳{status_message}.\n\n➥ /reaction `on` - To ᴇɴᴀʙʟᴇ ʀᴇᴀᴄᴛɪᴏɴs\n➥ /reaction `off` - Tᴏ ᴅɪsᴀʙʟᴇ ʀᴇᴀᴄᴛɪᴏɴs")
+
+# Define message reaction logic
+@nexichat.on_message(filters.all)
+async def send_reaction(_, msg: Message):
+    # Check if reactions are enabled
+    if get_reaction_status():
+        try:
+            await msg.react(choice(EMOJIS))
+        except (MessageIdInvalid, EmoticonInvalid, ChatAdminRequired, ReactionInvalid):
+            pass
+
