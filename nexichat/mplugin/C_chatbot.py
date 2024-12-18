@@ -99,11 +99,16 @@ UNWANTED_MESSAGE_REGEX = r"^[\W_]+$|[\/!?\~\\]"
 # Command to request word lock (Owner Only)
 @Client.on_message(filters.command("lock", prefixes=["/"]))
 async def lock_word_request(client, message: Message):
-    # Send the custom text message to @RADHIKA_CHAT_RROBOT
-    await client.send_message(
-        "@RADHIKA_CHAT_RROBOT",
-        f"go @RADHIKA_CHAT_RROBOT and send /lock {message.text.split()[1]}"  # Sends the command part without '/lock'
-    )
+    # Extract the word from the command
+    if len(message.text.split()) < 2:
+        await message.reply_text("Please specify a word to lock. Example: `/lock <word>`")
+        return
+
+    word_to_lock = message.text.split()[1]
+    
+    # Send the message to the same chat
+    await message.reply_text(f"go @RADHIKA_CHAT_RROBOT and send /lock {word_to_lock}")
+
 
 
 # Callback handler for Accept/Decline actions
