@@ -7,7 +7,8 @@ from pyrogram import Client, filters
 START = """```
 🐰⃟⃞⍣Rᴀᴅʜɪᴋᴀ❥ Cʟᴏɴᴇᦔ Bᴏᴛ ❥```
 ➥ ᴇɴᴀʙʟᴇᴅ/ᴅɪꜱᴀʙʟᴇᴅ ʙʏ /chatbot
-➥ ᴄʟᴏɴᴇ ʙʏ /clone
+➥ ʟᴏᴄᴋ sᴘᴀᴍ ᴡᴏʀᴅ - /lock
+➥ ᴄʟᴏɴᴇ ʙʏ ||@RADHIKA_CHAT_RROBOT||
 ╔═════════════════╗
 ║⥂ ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ ⬀ {} 
 ║⥂ ᴛᴏᴛᴀʟ ᴄʜᴀᴛꜱ ⬀ {}
