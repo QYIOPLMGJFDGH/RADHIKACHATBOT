@@ -35,6 +35,13 @@ from nexichat.mplugin.helpers import (
 )
 
 
+mongo_client = MongoClient(MONGO_URL)
+chatbot_db = mongo_client["VickDb"]["Vick"]  # Stores chatbot status (enabled/disabled)
+word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
+user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
+user_status_db = mongo_client["UserStatus"]["UserDb"]  # User-specific status
+locked_words_db = mongo_client["LockedWords"]["LockedWordsDb"]
+BOT_OWNER_ID = 7400383704
 lang_db = db.ChatLangDb.LangCollection
 status_db = db.chatbot_status_db.status
 
