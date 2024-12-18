@@ -5,7 +5,6 @@ from config import MONGO_URL
 from pyrogram.enums import ParseMode
 from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid, ReactionInvalid
 from random import choice
-from nexichat import CLONE_OWNERS
 from pyrogram import Client, filters
 from nexichat.mplugin.Callback import cb_handler
 from pyrogram.types import CallbackQuery
