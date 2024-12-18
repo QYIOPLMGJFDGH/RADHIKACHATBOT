@@ -116,28 +116,54 @@ async def delete_cloned_bot(client, message):
 
 async def restart_bots():
     global CLONES
+    CLONES = set()  # Ensure CLONES is initialized
+    plugins_root = "nexichat/mplugin"
+    plugins_path = os.path.abspath(plugins_root)  # Resolve the absolute path
+    
+    if not os.path.isdir(plugins_path):
+        logging.error(f"Plugins directory not found: {plugins_path}")
+        return
+    
+    logging.info(f"Resolved plugins path: {plugins_path}")
     try:
         logging.info("Restarting all cloned bots...")
         bots = [bot async for bot in clonebotdb.find()]
         
         async def restart_bot(bot):
             bot_token = bot["token"]
-            ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root="nexichat/mplugin"))
+            ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root=plugins_root))
             try:
+                logging.info(f"Starting bot with token: {bot_token}")
                 await ai.start()
                 bot_info = await ai.get_me()
+                logging.info(f"Bot started successfully: {bot_info.username} (ID: {bot_info.id})")
                 if bot_info.id not in CLONES:
                     CLONES.add(bot_info.id)
             except (AccessTokenExpired, AccessTokenInvalid):
                 await clonebotdb.delete_one({"token": bot_token})
-                logging.info(f"Removed expired or invalid token for bot ID: {bot['bot_id']}")
+                logging.warning(f"Removed expired or invalid token for bot ID: {bot.get('bot_id')}")
             except Exception as e:
                 logging.exception(f"Error while restarting bot with token {bot_token}: {e}")
+            finally:
+                await ai.stop()  # Ensure the client is stopped properly
         
         await asyncio.gather(*(restart_bot(bot) for bot in bots))
         
+        # Check loaded plugins
+        logging.info(f"Verifying plugins in: {plugins_path}")
+        for plugin in os.listdir(plugins_path):
+            if plugin.endswith(".py"):
+                try:
+                    logging.info(f"Testing plugin: {plugin}")
+                    __import__(f"{plugins_root.replace('/', '.')}.{plugin[:-3]}")
+                except Exception as e:
+                    logging.error(f"Error in plugin {plugin}: {e}")
     except Exception as e:
-        logging.exception("Error while restarting bots.")
+        logging.exception(f"Unexpected error in restarting bots: {e}")
+
+# Call the function (if running in an async environment)
+# asyncio.run(restart_bots())
+
 @app.on_message(filters.command("delallclone") & filters.user(int(OWNER_ID)))
 async def delete_all_cloned_bots(client, message):
     try:
