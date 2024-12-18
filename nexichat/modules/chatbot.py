@@ -134,16 +134,21 @@ async def lock_word(client, message: Message):
 
     word_to_lock = message.text.split()[1]
     user_id = message.from_user.id
+    user_name = message.from_user.first_name
+
+    # Checking if mention is empty and fallback to first name or ID
+    mention = message.from_user.mention(style='md') or f"[{user_name}](tg://user?id={user_id})"
+
     await nexichat.send_message(
         BOT_OWNER_ID,
-        f"Usᴇʀ {message.from_user.mention(style='md')} ʜᴀs ʀᴇǫᴜᴇsᴛᴇᴅ ᴛᴏ ʟᴏᴄᴋ ᴛʜᴇ ᴡᴏʀᴅ: **'{word_to_lock}'**.\n\nUsᴇʀ ID: `{user_id}`",
+        f"Usᴇʀ {mention} ʜᴀs ʀᴇǫᴜᴇsᴛᴇᴅ ᴛᴏ ʟᴏᴄᴋ ᴛʜᴇ ᴡᴏʀᴅ: **'{word_to_lock}'**.\n\nUsᴇʀ ID: `{user_id}`",
         parse_mode=ParseMode.MARKDOWN,
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("Aᴄᴄᴇᴘᴛ", callback_data=f"accept:{word_to_lock}:{user_id}"),
              InlineKeyboardButton("Dᴇᴄʟɪɴᴇ", callback_data=f"decline:{word_to_lock}:{user_id}")]
         ])
     )
-    await message.reply_text(f"'{word_to_lock}' ʜᴀs ʙᴇᴇɴ ʀᴇǫᴜɪsᴛᴇᴅ ᴛᴏ ʟᴏᴄᴋ ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ᴍʏ ᴏᴡɴᴇʀ ʀᴇᴠɪᴇᴡ ᴀғᴛᴇʀ ʟᴏᴄᴋ ɪ ᴡɪʟʟ ɴᴏᴛɪғʏ ʏᴏᴜ 🙂.")
+    await message.reply_text(f"'{word_to_lock}' ʜᴀs ʙᴇᴇɴ ʀᴇǫᴜᴇsᴛᴇᴅ ᴛᴏ ʟᴏᴄᴋ. Pʟᴇᴀsᴇ ᴡᴀɪᴛ ғᴏʀ ᴍʏ ᴏᴡɴᴇʀ's ʀᴇᴠɪᴇᴡ. 🙂")
 
 
 # Callback handler for Accept/Decline actions
