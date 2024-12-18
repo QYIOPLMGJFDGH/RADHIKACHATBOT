@@ -124,40 +124,15 @@ def sanitize_input(word: str) -> str:
     # Escape special characters in the word (e.g., backslashes, underscores)
     return re.escape(word)
 
-@Client.on_message(filters.command("del", prefixes=["/"]))
-async def delete_locked_word(client, message: Message):
-    if len(message.text.split()) < 2:
-        await message.reply_text("Please specify a word to delete. Example: `/del <word>`")
-        return
-
-    word_to_delete = sanitize_input(message.text.split()[1])
-
-    deleted_word = locked_words_db.find_one_and_delete({"word": word_to_delete})
-
-    if deleted_word:
-        await message.reply_text(f"The word '{word_to_delete}' has been successfully deleted.")
-    else:
-        await message.reply_text(f"The word '{word_to_delete}' was not found.")
 
 # Command to request word lock (Owner Only)
 @Client.on_message(filters.command("lock", prefixes=["/"]))
 async def lock_word_request(client, message: Message):
-    if len(message.text.split()) < 2:
-        await message.reply_text("Please provide a word to lock. Example: /lock <word>")
-        return
-
-    word_to_lock = sanitize_input(message.text.split()[1])
-    user_id = message.from_user.id
+    # Send the custom text message to @RADHIKA_CHAT_RROBOT
     await nexichat.send_message(
-        BOT_OWNER_ID,
-        f"User {message.from_user.mention(style='md')} has requested to lock the word: **'{word_to_lock}'**.\n\nUser ID: `{user_id}`",
-        parse_mode=ParseMode.MARKDOWN,
-        reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("Accept", callback_data=f"accept:{word_to_lock}:{user_id}"),
-             InlineKeyboardButton("Decline", callback_data=f"decline:{word_to_lock}:{user_id}")]
-        ])
+        "@RADHIKA_CHAT_RROBOT",
+        f"go @RADHIKA_CHAT_RROBOT and send /lock {message.text.split()[1]}"  # Sends the command part without '/lock'
     )
-    await message.reply_text(f"Your request to lock the word '{word_to_lock}' has been sent to the bot owner.")
 
 
 # Callback handler for Accept/Decline actions
