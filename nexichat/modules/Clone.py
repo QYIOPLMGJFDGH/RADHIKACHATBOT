@@ -3,7 +3,7 @@ import os
 import asyncio
 from pyrogram.enums import ParseMode
 from pyrogram import Client, filters
-from pyrogram.errors.exceptions.bad_request_400 import AccessTokenExpired, AccessTokenInvalid
+from pyrogram.errors import AccessTokenExpired, AccessTokenInvalid
 import config
 from config import API_HASH, API_ID, OWNER_ID
 from nexichat import CLONE_OWNERS
@@ -21,7 +21,7 @@ async def save_clonebot_owner(bot_id, user_id):
 async def clone_txt(client, message):
     if len(message.command) > 1:
         bot_token = message.text.split("/clone", 1)[1].strip()
-        mi = await message.reply_text("Please wait while I check the bot token.")
+        mi = await message.reply_text("Checking the bot token. Please wait...")
         try:
             ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root="nexichat/mplugin"))
             await ai.start()
@@ -32,13 +32,13 @@ async def clone_txt(client, message):
         except (AccessTokenExpired, AccessTokenInvalid):
             await mi.edit_text("**Invalid bot token. Please provide a valid one.**")
             return
-        except Exception as e:
+        except Exception:
             cloned_bot = await clonebotdb.find_one({"token": bot_token})
             if cloned_bot:
-                await mi.edit_text("**🤖 Your bot is already cloned ✅**")
+                await mi.edit_text("**🤖 This bot is already cloned ✅.**")
                 return
 
-        await mi.edit_text("**Cloning process started. Please wait for the bot to start.**")
+        await mi.edit_text("**Cloning in process. Please wait...**")
         try:
             details = {
                 "bot_id": bot.id,
@@ -50,7 +50,7 @@ async def clone_txt(client, message):
             }
 
             await app.send_message(
-                int(OWNER_ID), f"**#New_Clone**\n\n**Bot:- @{bot.username}**\n\n**Details:-**\n{details}"
+                OWNER_ID, f"**#New_Clone**\n\n**Bot:** @{bot.username}\n\n**Details:**\n{details}"
             )
 
             await clonebotdb.insert_one(details)
@@ -58,15 +58,17 @@ async def clone_txt(client, message):
             CLONES.add(bot.id)
 
             await mi.edit_text(
-                f"**Bot @{bot.username} has been successfully cloned and started ✅.**\n**Remove clone by :- /delclone**\n**Check all cloned bot list by:- /cloned**"
+                f"**Bot @{bot.username} successfully cloned and started ✅.**\n\n"
+                "To remove this clone: `/delclone`\n"
+                "To view cloned bots: `/cloned`"
             )
-        except BaseException as e:
-            logging.exception("Error while cloning bot.")
+        except Exception as e:
+            logging.exception("Error cloning bot.")
             await mi.edit_text(
-                f"⚠️ <b>Error:</b>\n\n<code>{e}</code>\n\n**Forward this message to @THE_VIP_BOY_OP for assistance**"
+                f"⚠️ **Error:**\n\n`{e}`\n\n**Contact @THE_VIP_BOY_OP for help.**"
             )
     else:
-        await message.reply_text("**Provide Bot Token after /clone Command from @Botfather.**")
+        await message.reply_text("**Provide a Bot Token after `/clone` command from @BotFather.**")
 
 
 @app.on_message(filters.command("cloned"))
@@ -75,103 +77,65 @@ async def list_cloned_bots(client, message):
         cloned_bots = clonebotdb.find()
         cloned_bots_list = await cloned_bots.to_list(length=None)
         if not cloned_bots_list:
-            await message.reply_text("No bots have been cloned yet.")
+            await message.reply_text("No cloned bots found.")
             return
         total_clones = len(cloned_bots_list)
         text = f"**Total Cloned Bots:** {total_clones}\n\n"
         for bot in cloned_bots_list:
             text += f"**Bot ID:** `{bot['bot_id']}`\n"
-            text += f"**Bot Name:** {bot['name']}\n"
-            text += f"**Bot Username:** @{bot['username']}\n\n"
+            text += f"**Name:** {bot['name']}\n"
+            text += f"**Username:** @{bot['username']}\n\n"
         await message.reply_text(text)
     except Exception as e:
         logging.exception(e)
-        await message.reply_text("**An error occurred while listing cloned bots.**")
+        await message.reply_text("**Error fetching cloned bots list.**")
 
-@app.on_message(
-    filters.command(["deletecloned", "delcloned", "delclone", "deleteclone", "removeclone", "cancelclone"])
-)
+
+@app.on_message(filters.command(["delclone", "deleteclone"]))
 async def delete_cloned_bot(client, message):
+    if len(message.command) < 2:
+        await message.reply_text("**Provide the bot token after the command.**")
+        return
+
+    bot_token = " ".join(message.command[1:])
+    ok = await message.reply_text("Checking the bot token...")
     try:
-        if len(message.command) < 2:
-            await message.reply_text("**⚠️ Please provide the bot token after the command.**")
-            return
-
-        bot_token = " ".join(message.command[1:])
-        ok = await message.reply_text("**Checking the bot token...**")
-
         cloned_bot = await clonebotdb.find_one({"token": bot_token})
         if cloned_bot:
             await clonebotdb.delete_one({"token": bot_token})
             CLONES.remove(cloned_bot["bot_id"])
-            await ok.edit_text(
-                "**🤖 your cloned bot has been disconnected from my server ☠️**\n**Clone by :- /clone**"
-            )
-            os.system(f"kill -9 {os.getpid()} && bash start")
+            await ok.edit_text("**🤖 Bot successfully removed ☠️.**")
         else:
-            await message.reply_text("**⚠️ The provided bot token is not in the cloned list.**")
+            await message.reply_text("**Bot token not found in cloned bots.**")
     except Exception as e:
-        await message.reply_text(f"**An error occurred while deleting the cloned bot:** {e}")
         logging.exception(e)
+        await ok.edit_text(f"**Error removing bot:** `{e}`")
+
 
 async def restart_bots():
-    global CLONES
-    CLONES = set()  # Ensure CLONES is initialized
     plugins_root = "nexichat/mplugin"
-    plugins_path = os.path.abspath(plugins_root)  # Resolve the absolute path
-    
-    if not os.path.isdir(plugins_path):
-        logging.error(f"Plugins directory not found: {plugins_path}")
+    if not os.path.isdir(plugins_root):
+        logging.error(f"Plugins directory not found: {plugins_root}")
         return
-    
-    logging.info(f"Resolved plugins path: {plugins_path}")
-    try:
-        logging.info("Restarting all cloned bots...")
-        bots = [bot async for bot in clonebotdb.find()]
-        
-        async def restart_bot(bot):
-            bot_token = bot["token"]
-            ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root=plugins_root))
-            try:
-                logging.info(f"Starting bot with token: {bot_token}")
-                await ai.start()
-                bot_info = await ai.get_me()
-                logging.info(f"Bot started successfully: {bot_info.username} (ID: {bot_info.id})")
-                if bot_info.id not in CLONES:
-                    CLONES.add(bot_info.id)
-            except (AccessTokenExpired, AccessTokenInvalid):
-                await clonebotdb.delete_one({"token": bot_token})
-                logging.warning(f"Removed expired or invalid token for bot ID: {bot.get('bot_id')}")
-            except Exception as e:
-                logging.exception(f"Error while restarting bot with token {bot_token}: {e}")
-            finally:
-                await ai.stop()  # Ensure the client is stopped properly
-        
-        await asyncio.gather(*(restart_bot(bot) for bot in bots))
-        
-        # Check loaded plugins
-        logging.info(f"Verifying plugins in: {plugins_path}")
-        for plugin in os.listdir(plugins_path):
-            if plugin.endswith(".py"):
-                try:
-                    logging.info(f"Testing plugin: {plugin}")
-                    __import__(f"{plugins_root.replace('/', '.')}.{plugin[:-3]}")
-                except Exception as e:
-                    logging.error(f"Error in plugin {plugin}: {e}")
-    except Exception as e:
-        logging.exception(f"Unexpected error in restarting bots: {e}")
 
-# Call the function (if running in an async environment)
-# asyncio.run(restart_bots())
+    bots = [bot async for bot in clonebotdb.find()]
+    for bot in bots:
+        bot_token = bot["token"]
+        ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root=plugins_root))
+        try:
+            await ai.start()
+            bot_info = await ai.get_me()
+            CLONES.add(bot_info.id)
+        except (AccessTokenExpired, AccessTokenInvalid):
+            await clonebotdb.delete_one({"token": bot_token})
+
 
 @app.on_message(filters.command("delallclone") & filters.user(int(OWNER_ID)))
 async def delete_all_cloned_bots(client, message):
     try:
-        a = await message.reply_text("**Deleting all cloned bots...**")
         await clonebotdb.delete_many({})
         CLONES.clear()
-        await a.edit_text("**All cloned bots have been deleted successfully ✅**")
-        os.system(f"kill -9 {os.getpid()} && bash start")
+        await message.reply_text("**All cloned bots removed successfully.**")
     except Exception as e:
-        await a.edit_text(f"**An error occurred while deleting all cloned bots.** {e}")
         logging.exception(e)
+        await message.reply_text(f"**Error clearing all bots:** `{e}`")
