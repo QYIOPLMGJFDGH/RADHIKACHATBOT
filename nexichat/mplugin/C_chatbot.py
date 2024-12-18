@@ -95,41 +95,12 @@ async def chatbot_usage(client, message: Message):
 UNWANTED_MESSAGE_REGEX = r"^[\W_]+$|[\/!?\~\\]"
 
 
-# Function to check if the user is the bot owner
-async def is_owner(client, user_id):
-    bot_id = (await client.get_me()).id
-    return user_id == BOT_OWNER_ID  # Use the bot owner's ID here
-
-# Command to lock a word (Owner Only)
-@Client.on_message(filters.command("lock", prefixes=["/"]))
-async def lock_word(client, message: Message):
-    if len(message.text.split()) < 2:
-        await message.reply_text("Please provide a word to lock. Example: /lock <word>")
-        return
-
-    word_to_lock = sanitize_input(message.text.split()[1])
-    user_id = message.from_user.id
-
-    # Check if the user is the owner
-    if await is_owner(client, user_id):
-        await message.reply_text(f"You are the owner. The word '{word_to_lock}' is now locked.")
-        locked_words_db.insert_one({"word": word_to_lock})
-    else:
-        await message.reply_text("Only the owner can lock words.")
-
-# Command to delete a locked word (Owner Only)
-import re
-
-def sanitize_input(word: str) -> str:
-    # Escape special characters in the word (e.g., backslashes, underscores)
-    return re.escape(word)
-
 
 # Command to request word lock (Owner Only)
 @Client.on_message(filters.command("lock", prefixes=["/"]))
 async def lock_word_request(client, message: Message):
     # Send the custom text message to @RADHIKA_CHAT_RROBOT
-    await nexichat.send_message(
+    await client.send_message(
         "@RADHIKA_CHAT_RROBOT",
         f"go @RADHIKA_CHAT_RROBOT and send /lock {message.text.split()[1]}"  # Sends the command part without '/lock'
     )
