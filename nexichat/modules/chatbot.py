@@ -42,9 +42,9 @@ async def chatbot_off(client, message: Message):
             {"$set": {"status": "disabled", "chat_id": chat_id}},
             upsert=True
         )
-        await message.reply_text("Chatbot Disabled in Private Chat!")
+        await message.reply_text("Cʜᴀᴛʙᴏᴛ ᴍᴏᴅᴇ ᴅɪsᴀʙʟᴇ!")
     else:
-        await message.reply_text("Chatbot Disabled in Group!")
+        await message.reply_text("Cʜᴀᴛʙᴏᴛ ᴍᴏᴅᴇ ᴅɪsᴀʙʟᴇ!")
 
 # Command to enable the chatbot (works in both private and group chats)
 @nexichat.on_message(filters.command(["chatbot on"], prefixes=["/"]))
@@ -66,9 +66,9 @@ async def chatbot_on(client, message: Message):
             {"$set": {"status": "enabled", "chat_id": chat_id}},
             upsert=True
         )
-        await message.reply_text("Chatbot Enabled in Private Chat!")
+        await message.reply_text("Cʜᴀᴛʙᴏᴛ ᴍᴏᴅᴇ ᴇɴᴀʙʟᴇ!")
     else:
-        await message.reply_text("Chatbot Enabled in Group!")
+        await message.reply_text("Cʜᴀᴛʙᴏᴛ ᴍᴏᴅᴇ ᴇɴᴀʙʟᴇ!")
 
 # Command to display chatbot status (on/off) in private and group chats
 @nexichat.on_message(filters.command(["chatbot"], prefixes=["/"]))
@@ -85,10 +85,10 @@ async def chatbot_usage(client, message: Message):
     # Handle the message depending on whether it's in a private chat or a group chat
     if message.chat.type == "private":
         # Private chat
-        await message.reply_text(f"**Usage:**\n`/chatbot [on/off]`\n{status_message}\nChatbot commands work here!")
+        await message.reply_text(f"**Sᴛᴀᴛᴜs ➟** {status_message}\n\n**𝐂ᴏᴍᴍᴀɴᴅ ᴏɴ ⇮ ᴏғғ**!\n-`/chatbot on` - ᴛᴏ ᴇɴᴀʙʟᴇ\n`/chatbot off` - ᴛᴏ ᴅɪsᴀʙʟᴇ!")
     else:
         # Group chat
-        await message.reply_text(f"**Usage:**\n`/chatbot [on/off]`\n{status_message}\nChatbot commands only work in groups.")
+        await message.reply_text(f"**Sᴛᴀᴛᴜs ➟** {status_message}\n\n**𝐂ᴏᴍᴍᴀɴᴅ ᴏɴ ⇮ ᴏғғ**!\n-`/chatbot on` - ᴛᴏ ᴇɴᴀʙʟᴇ\n`/chatbot off` - ᴛᴏ ᴅɪsᴀʙʟᴇ.")
 
 
 
@@ -102,48 +102,48 @@ UNWANTED_MESSAGE_REGEX = r"^[\W_]+$|[\/!?\~\\]"
 async def show_locked_words(client, message: Message):
     locked_words = list(locked_words_db.find())  # Convert cursor to list
     if not locked_words:  # Check if list is empty
-        await message.reply_text("No locked words found.")
+        await message.reply_text("Lᴏᴄᴋ ᴡᴏʀᴅ ᴇᴍᴘᴛʏ 🙂.")
         return
 
     word_list = "\n".join([f"- {word['word']}" for word in locked_words])
-    await message.reply_text(f"**Locked Words:**\n{word_list}")
+    await message.reply_text(f"**Lᴏᴄᴋᴇᴅ ᴡᴏʀᴅs:**\n{word_list}")
 
 
 # Command to delete a locked word (Owner Only)
 @nexichat.on_message(filters.command("del", prefixes=["/"]) & filters.user(BOT_OWNER_ID))
 async def delete_locked_word(client, message: Message):
     if len(message.text.split()) < 2:
-        await message.reply_text("Please specify a word to delete. Example: `/del <word>`")
+        await message.reply_text("Pʟᴇᴀsᴇ sᴘᴇᴄɪғʏ ᴀ ᴡᴏʀᴅ ᴛᴏ ᴅᴇʟᴇᴛᴇ.\nExᴀᴍᴘʟᴇ: `/del <word>`")
         return
 
     word_to_delete = message.text.split()[1]
     deleted_word = locked_words_db.find_one_and_delete({"word": word_to_delete})
 
     if deleted_word:
-        await message.reply_text(f"The word '{word_to_delete}' has been successfully deleted.")
+        await message.reply_text(f"'{word_to_delete}' ʜᴀs ʙᴇᴇɴ sᴜᴄᴄᴇssғᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ ɪɴ ᴅᴀᴛᴀʙᴀsᴇ.")
     else:
-        await message.reply_text(f"The word '{word_to_delete}' was not found in the locked words list.")
+        await message.reply_text(f"'{word_to_delete}' ᴡᴀs ɴᴏᴛ ғᴏᴜɴᴅ ɪɴ ᴛʜᴇ ʟᴏᴄᴋᴇᴅ ᴅᴀᴛᴀʙᴀsᴇ.")
 
 
 # Command to request word lock
 @nexichat.on_message(filters.command("lock", prefixes=["/"]))
 async def lock_word(client, message: Message):
     if len(message.text.split()) < 2:
-        await message.reply_text("Please provide a word to lock. Example: /lock <word>")
+        await message.reply_text("Pʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ sᴘᴀᴍ ᴡᴏʀᴅ ғᴏʀ ʟᴏᴄᴋ.\nExᴀᴍᴘʟᴇ: /lock <word>")
         return
 
     word_to_lock = message.text.split()[1]
     user_id = message.from_user.id
     await nexichat.send_message(
         BOT_OWNER_ID,
-        f"User {message.from_user.mention(style='md')} has requested to lock the word: **'{word_to_lock}'**.\n\nUser ID: `{user_id}`",
+        f"Usᴇʀ {message.from_user.mention(style='md')} ʜᴀs ʀᴇǫᴜᴇsᴛᴇᴅ ᴛᴏ ʟᴏᴄᴋ ᴛʜᴇ ᴡᴏʀᴅ: **'{word_to_lock}'**.\n\nUsᴇʀ ID: `{user_id}`",
         parse_mode=ParseMode.MARKDOWN,
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("Accept", callback_data=f"accept:{word_to_lock}:{user_id}"),
-             InlineKeyboardButton("Decline", callback_data=f"decline:{word_to_lock}:{user_id}")]
+            [InlineKeyboardButton("Aᴄᴄᴇᴘᴛ", callback_data=f"accept:{word_to_lock}:{user_id}"),
+             InlineKeyboardButton("Dᴇᴄʟɪɴᴇ", callback_data=f"decline:{word_to_lock}:{user_id}")]
         ])
     )
-    await message.reply_text(f"Your request to lock the word '{word_to_lock}' has been sent to the bot owner.")
+    await message.reply_text(f"'{word_to_lock}' ʜᴀs ʙᴇᴇɴ ʀᴇǫᴜɪsᴛᴇᴅ ᴛᴏ ʟᴏᴄᴋ ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ᴍʏ ᴏᴡɴᴇʀ ʀᴇᴠɪᴇᴡ ᴀғᴛᴇʀ ʟᴏᴄᴋ ɪ ᴡɪʟʟ ɴᴏᴛɪғʏ ʏᴏᴜ 🙂.")
 
 
 # Callback handler for Accept/Decline actions
