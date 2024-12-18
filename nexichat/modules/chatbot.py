@@ -6,6 +6,7 @@ from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid
 from random import choice
 from pyrogram import Client, filters
 from nexichat import nexichat
+from nexichat.modules.Callback import cb_handler
 from pyrogram.types import CallbackQuery
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from pyrogram.enums import ChatAction
