@@ -5,6 +5,7 @@ from config import MONGO_URL
 from pyrogram.enums import ParseMode
 from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid, ReactionInvalid
 from random import choice
+from nexichat import CLONE_OWNERS
 from pyrogram import Client, filters
 from nexichat.mplugin.Callback import cb_handler
 from pyrogram.types import CallbackQuery
@@ -19,7 +20,7 @@ word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
 locked_words_db = mongo_client["LockedWords"]["LockedWordsDb"]
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # User-specific status
-BOT_OWNER_ID = 7400383704
+BOT_OWNER_ID = CLONE_OWNERS
 
 # Command to disable the chatbot (works for all users in both private and group chats)
 @Client.on_message(filters.command(["chatbot off"], prefixes=["/"]))
