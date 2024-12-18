@@ -165,8 +165,8 @@ async def lock_word(client, message: Message):
 # Chatbot responder for group chats
 @Client.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
 async def chatbot_responder(client: Client, message: Message):
-    # Filter out unwanted messages
-    if re.match(UNWANTED_MESSAGE_REGEX, message.text):
+    # Ensure message.text is not None before using re.match
+    if message.text and re.match(UNWANTED_MESSAGE_REGEX, message.text):
         return
 
     chat_id = message.chat.id
