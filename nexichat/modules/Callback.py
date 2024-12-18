@@ -17,6 +17,7 @@ from pyrogram.enums import ChatMemberStatus as CMS
 from pyrogram.types import CallbackQuery
 import asyncio
 import config
+from pymongo import MongoClient
 from nexichat import LOGGER, nexichat, db
 from nexichat.modules.helpers import chatai
 from nexichat.modules.helpers import (
@@ -33,6 +34,12 @@ from nexichat.modules.helpers import (
     languages,
 )
 
+mongo_client = MongoClient(MONGO_DB_URI)
+chatbot_db = mongo_client["VickDb"]["Vick"]  # Stores chatbot status (enabled/disabled)
+word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
+user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
+user_status_db = mongo_client["UserStatus"]["UserDb"]  # User-specific status
+BOT_OWNER_ID = 7400383704
 lang_db = db.ChatLangDb.LangCollection
 status_db = db.chatbot_status_db.status
 
