@@ -103,32 +103,32 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
                     # Update callback message
                     await query.message.edit_text(
-                        text=f"✅ The word '{word_to_lock}' has been locked."
+                        text=f"✅ Tʜᴇ ᴡᴏʀᴅ '{word_to_lock}' ʜᴀs ʙᴇᴇɴ ʟᴏᴄᴋᴇᴅ."
                     )
 
                     # Notify the user
                     await client.send_message(
                         chat_id=user_id,
-                        text=f"Your request to lock the word '{word_to_lock}' has been **accepted** by the bot owner."
+                        text=f"Yᴏᴜʀ ʀᴇǫᴜᴇsᴛ ᴛᴏ ʟᴏᴄᴋ ᴛʜᴇ ᴡᴏʀᴅ '{word_to_lock}' ʜᴀs ʙᴇᴇɴ **ᴀᴄᴄᴇᴘᴛᴇᴅ** ᴍʏ ᴏᴡɴᴇʀ\nTʜᴀɴᴋ ʏᴏᴜ 🙂."
                     )
 
                 elif action == "decline":
                     # Update callback message
                     await query.message.edit_text(
-                        text=f"❌ The request to lock '{word_to_lock}' has been declined."
+                        text=f"❌ Tʜᴇ ʀᴇǫᴜᴇsᴛ ᴛᴏ ʟᴏᴄᴋ '{word_to_lock}' ʜᴀs ʙᴇᴇɴ ᴅᴇᴄʟɪɴeᴅ 🤭."
                     )
 
                     # Notify the user
                     await client.send_message(
                         chat_id=user_id,
-                        text=f"Your request to lock the word '{word_to_lock}' has been **declined** by the bot owner."
+                        text=f"Yᴏᴜʀ ʀᴇǫᴜᴇsᴛ ᴛᴏ ʟᴏᴄᴋ ᴛʜᴇ ᴡᴏʀᴅ '{word_to_lock}' ʜᴀs ʙᴇᴇɴ **ᴅᴇᴄʟɪɴᴇᴅ** ᴍʏ ᴏᴡɴᴇʀ 😅.\nTʜᴀɴᴋ ʏᴏᴜ 😇"
                     )
 
                 # Acknowledge the callback query
                 await query.answer()
             else:
                 # Unauthorized user clicks the button
-                await query.answer("You are not authorized to perform this action.", show_alert=True)
+                await query.answer("Yᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴅᴏ ᴛʜɪs ᴀᴄᴛɪᴏɴ.", show_alert=True)
 
         # Handle CLOSE callback
         elif query.data == "CLOSE":
