@@ -14,7 +14,7 @@ from nexichat import mongo
 from datetime import datetime
 from nexichat.mplugin.helpers import is_owner
 from nexichat.database.chats import get_served_chats, add_served_chat
-from nexichat.database.users import get_served_users, add_MongoClient
+from nexichat.database.users import get_served_users
 from config import MONGO_URL
 from config import OWNER_ID, MONGO_URL, OWNER_USERNAME
 from pyrogram.enums import ParseMode
