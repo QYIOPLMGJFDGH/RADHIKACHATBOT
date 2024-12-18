@@ -72,7 +72,7 @@ async def fetch_data():
     return START_TEXT
 
 
-@nexichat.on_callback_query()
+@Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     try:
         LOGGER.info(query.data)
