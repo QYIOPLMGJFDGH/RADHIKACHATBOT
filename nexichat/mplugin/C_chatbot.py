@@ -4,7 +4,6 @@ import random
 from config import MONGO_URL
 from pyrogram.enums import ParseMode
 from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid, ReactionInvalid
-from random import choice
 from pyrogram import Client, filters
 from nexichat import CLONE_OWNERS
 from nexichat.mplugin.Callback import cb_handler
@@ -19,7 +18,6 @@ chatbot_db = mongo_client["VickDb"]["Vick"]  # Stores chatbot status (enabled/di
 word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
 locked_words_db = mongo_client["LockedWords"]["LockedWordsDb"]
-user_status_db = mongo_client["UserStatus"]["UserDb"]  # User-specific status
 BOT_OWNER_ID = 7400383704
 
 # Command to disable the chatbot (works for all users in both private and group chats)
@@ -90,20 +88,15 @@ async def chatbot_usage(client, message: Message):
         # Group chat
         await message.reply_text(f"**Usage:**\n`/chatbot [on/off]`\n{status_message}\nChatbot commands only work in groups.")
 
-
-
 # Regular expression to filter unwanted messages containing special characters like /, !, ?, ~, \
 UNWANTED_MESSAGE_REGEX = r"^[\W_]+$|[\/!?\~\\]"
 
-
-# Command to display all locked words (Owner Only)
-# Command to display all locked words (Owner Only)
 # Function to check if the user is the bot owner
 async def is_owner(client, user_id):
     bot_id = (await client.get_me()).id
-    # Check if the user_id matches the bot owner ID stored in your config or database
     return user_id == BOT_OWNER_ID  # Use the bot owner's ID here
 
+# Command to lock a word (Owner Only)
 @Client.on_message(filters.command("lock", prefixes=["/"]))
 async def lock_word(client, message: Message):
     if len(message.text.split()) < 2:
@@ -121,8 +114,6 @@ async def lock_word(client, message: Message):
         # Notify user that only the owner can lock words
         await message.reply_text("Only the owner can lock words.")
 
-
-
 # Command to delete a locked word (Owner Only)
 @Client.on_message(filters.command("del", prefixes=["/"]) & filters.user(BOT_OWNER_ID))
 async def delete_locked_word(client, message: Message):
@@ -138,16 +129,17 @@ async def delete_locked_word(client, message: Message):
     else:
         await message.reply_text(f"The word '{word_to_delete}' was not found in the locked words list.")
 
-
 # Command to request word lock
 @Client.on_message(filters.command("lock", prefixes=["/"]))
-async def lock_word(client, message: Message):
+async def request_lock_word(client, message: Message):
     if len(message.text.split()) < 2:
         await message.reply_text("Please provide a word to lock. Example: /lock <word>")
         return
 
     word_to_lock = message.text.split()[1]
     user_id = message.from_user.id
+
+    # Send a request to the owner
     await nexichat.send_message(
         BOT_OWNER_ID,
         f"User {message.from_user.mention(style='md')} has requested to lock the word: **'{word_to_lock}'**.\n\nUser ID: `{user_id}`",
@@ -159,8 +151,17 @@ async def lock_word(client, message: Message):
     )
     await message.reply_text(f"Your request to lock the word '{word_to_lock}' has been sent to the bot owner.")
 
-
 # Callback handler for Accept/Decline actions
+@Client.on_callback_query()
+async def cb_handler(client: Client, callback_query: CallbackQuery):
+    action, word_to_lock, user_id = callback_query.data.split(":")
+    user_id = int(user_id)
+
+    if action == "accept":
+        locked_words_db.insert_one({"word": word_to_lock})
+        await callback_query.answer(f"The word '{word_to_lock}' has been locked.")
+    elif action == "decline":
+        await callback_query.answer(f"The request to lock the word '{word_to_lock}' has been declined.")
 
 # Chatbot responder for group chats
 @Client.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
