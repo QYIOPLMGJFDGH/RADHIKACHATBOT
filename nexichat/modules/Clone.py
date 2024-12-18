@@ -21,7 +21,7 @@ async def save_clonebot_owner(bot_id, user_id):
 async def clone_txt(client, message):
     if len(message.command) > 1:
         bot_token = message.text.split("/clone", 1)[1].strip()
-        mi = await message.reply_text("Checking the bot token. Please wait...")
+        mi = await message.reply_text("➥ Cʜᴇᴄᴋɪɴɢ ʙᴏᴛ ᴛᴏᴋᴇɴ ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ↺......")
         try:
             ai = Client(bot_token, API_ID, API_HASH, bot_token=bot_token, plugins=dict(root="nexichat/mplugin"))
             await ai.start()
