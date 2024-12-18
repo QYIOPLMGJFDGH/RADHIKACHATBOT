@@ -4,6 +4,7 @@ import random
 from config import MONGO_URL
 from pyrogram.enums import ParseMode
 from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid, ReactionInvalid
+from random import choice
 from pyrogram import Client, filters
 from nexichat import CLONE_OWNERS
 from nexichat.mplugin.Callback import cb_handler
@@ -18,6 +19,7 @@ chatbot_db = mongo_client["VickDb"]["Vick"]  # Stores chatbot status (enabled/di
 word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
 locked_words_db = mongo_client["LockedWords"]["LockedWordsDb"]
+user_status_db = mongo_client["UserStatus"]["UserDb"]  # User-specific status
 BOT_OWNER_ID = 7400383704
 
 # Command to disable the chatbot (works for all users in both private and group chats)
@@ -88,8 +90,10 @@ async def chatbot_usage(client, message: Message):
         # Group chat
         await message.reply_text(f"**Usage:**\n`/chatbot [on/off]`\n{status_message}\nChatbot commands only work in groups.")
 
+
 # Regular expression to filter unwanted messages containing special characters like /, !, ?, ~, \
 UNWANTED_MESSAGE_REGEX = r"^[\W_]+$|[\/!?\~\\]"
+
 
 # Function to check if the user is the bot owner
 async def is_owner(client, user_id):
@@ -103,7 +107,7 @@ async def lock_word(client, message: Message):
         await message.reply_text("Please provide a word to lock. Example: /lock <word>")
         return
 
-    word_to_lock = message.text.split()[1]
+    word_to_lock = sanitize_input(message.text.split()[1])
     user_id = message.from_user.id
 
     # Check if the user is the owner
@@ -111,7 +115,6 @@ async def lock_word(client, message: Message):
         await message.reply_text(f"You are the owner. The word '{word_to_lock}' is now locked.")
         locked_words_db.insert_one({"word": word_to_lock})
     else:
-        # Notify user that only the owner can lock words
         await message.reply_text("Only the owner can lock words.")
 
 # Command to delete a locked word (Owner Only)
@@ -121,26 +124,24 @@ async def delete_locked_word(client, message: Message):
         await message.reply_text("Please specify a word to delete. Example: `/del <word>`")
         return
 
-    word_to_delete = message.text.split()[1]
+    word_to_delete = sanitize_input(message.text.split()[1])
     deleted_word = locked_words_db.find_one_and_delete({"word": word_to_delete})
 
     if deleted_word:
-        # Correct the message by escaping special characters and using proper text formatting
         await message.reply_text(f"The word '{word_to_delete}' has been successfully deleted.")
     else:
         await message.reply_text(f"The word '{word_to_delete}' was not found in the locked words list.")
 
-# Command to request word lock
+
+# Command to request word lock (Owner Only)
 @Client.on_message(filters.command("lock", prefixes=["/"]))
-async def request_lock_word(client, message: Message):
+async def lock_word_request(client, message: Message):
     if len(message.text.split()) < 2:
         await message.reply_text("Please provide a word to lock. Example: /lock <word>")
         return
 
-    word_to_lock = message.text.split()[1]
+    word_to_lock = sanitize_input(message.text.split()[1])
     user_id = message.from_user.id
-
-    # Send a request to the owner
     await nexichat.send_message(
         BOT_OWNER_ID,
         f"User {message.from_user.mention(style='md')} has requested to lock the word: **'{word_to_lock}'**.\n\nUser ID: `{user_id}`",
@@ -152,33 +153,21 @@ async def request_lock_word(client, message: Message):
     )
     await message.reply_text(f"Your request to lock the word '{word_to_lock}' has been sent to the bot owner.")
 
-# Callback handler for Accept/Decline actions
-@Client.on_callback_query()
-async def cb_handler(client: Client, callback_query: CallbackQuery):
-    action, word_to_lock, user_id = callback_query.data.split(":")
-    user_id = int(user_id)
 
-    if action == "accept":
-        locked_words_db.insert_one({"word": word_to_lock})
-        await callback_query.answer(f"The word '{word_to_lock}' has been locked.")
-    elif action == "decline":
-        await callback_query.answer(f"The request to lock the word '{word_to_lock}' has been declined.")
+# Callback handler for Accept/Decline actions
 
 # Chatbot responder for group chats
 @Client.on_message((filters.text | filters.sticker) & ~filters.private & ~filters.bot)
 async def chatbot_responder(client: Client, message: Message):
-    # Ensure message.text is not None before using re.match
     if message.text and re.match(UNWANTED_MESSAGE_REGEX, message.text):
         return
 
     chat_id = message.chat.id
 
-    # Check if the chatbot is enabled
     chatbot_status = chatbot_db.find_one({"chat_id": chat_id})
     if not chatbot_status or chatbot_status.get("status") == "disabled":
         return
 
-    # Check if the word is locked
     locked_word = locked_words_db.find_one({"word": message.text})
     if locked_word:
         return  # Don't reply if the word is locked
@@ -209,19 +198,22 @@ async def chatbot_responder(client: Client, message: Message):
             elif message.sticker:
                 word_db.insert_one({"word": reply.text, "text": message.sticker.file_id, "check": "sticker"})
 
+
+# Function to sanitize input to prevent errors caused by special characters
+def sanitize_input(word):
+    return re.sub(r'[^A-Za-z0-9\s]', '', word)
+
+
 # Chatbot responder for private chats
 @Client.on_message((filters.text | filters.sticker) & filters.private & ~filters.bot)
 async def chatbot_private(client: Client, message: Message):
-    # Filter out unwanted messages
     if re.match(UNWANTED_MESSAGE_REGEX, message.text):
         return
 
-    # Check if the chatbot is enabled
     chatbot_status = chatbot_db.find_one({"chat_id": message.chat.id})
     if not chatbot_status or chatbot_status.get("status") == "disabled":
         return
 
-    # Check if the word is locked
     locked_word = locked_words_db.find_one({"word": message.text})
     if locked_word:
         return  # Don't reply if the word is locked
