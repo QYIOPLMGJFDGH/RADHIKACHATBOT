@@ -65,69 +65,118 @@ async def fetch_data():
     return START_TEXT
 
 
-@Client.on_callback_query()
+@nexichat.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
-    LOGGER.info(query.data)
+    try:
+        LOGGER.info(query.data)
 
-    START_TEXT = await fetch_data()
+        # Fetch START_TEXT dynamically
+        START_TEXT = await fetch_data()
 
-    # Help menu
-    if query.data == "HELP":
-        await query.message.edit_text(
-            text=HELP_READ,
-            reply_markup=InlineKeyboardMarkup(HELP_BTN),
-            disable_web_page_preview=True,
-        )
+        # Handle HELP callback
+        if query.data == "HELP":
+            await query.message.edit_text(
+                text=HELP_READ,
+                reply_markup=InlineKeyboardMarkup(HELP_BTN),
+                disable_web_page_preview=True,
+            )
 
-    elif query.data == "HOME_BACK":
-        await query.message.edit(
-            text=START_TEXT,  # Use the dynamically fetched START_TEXT
-            reply_markup=InlineKeyboardMarkup(START_BOT),
-        )
+        # Parse callback data for word locking
+        elif ":" in query.data and len(query.data.split(":")) == 3:
+            action, word_to_lock, user_id = query.data.split(":")
+            user_id = int(user_id)
 
-    # Close menu
-    elif query.data == "CLOSE":
-        await query.message.delete()
-        await query.answer("Closed menu!", show_alert=True)
+            if query.from_user.id == BOT_OWNER_ID:
+                if action == "accept":
+                    # Lock the word
+                    locked_words_db.update_one(
+                        {"word": word_to_lock},
+                        {"$set": {"word": word_to_lock}},
+                        upsert=True
+                    )
 
-    # Go back to the main menu
-    elif query.data == "BACK":
-        await query.message.edit(
-            text=START,
-            reply_markup=InlineKeyboardMarkup(DEV_OP),
-        )
+                    # Update callback message
+                    await query.message.edit_text(
+                        text=f"✅ The word '{word_to_lock}' has been locked."
+                    )
 
-    # Show admin information
-    elif query.data == "ADMINS":
-        await query.message.edit(
-            text=ADMIN_READ,
-            reply_markup=InlineKeyboardMarkup(MUSIC_BACK_BTN),
-        )
+                    # Notify the user
+                    await client.send_message(
+                        chat_id=user_id,
+                        text=f"Your request to lock the word '{word_to_lock}' has been **accepted** by the bot owner."
+                    )
 
-    # Show tools information
-    elif query.data == "TOOLS_DATA":
-        await query.message.edit(
-            text=TOOLS_DATA_READ,
-            reply_markup=InlineKeyboardMarkup(CHATBOT_BACK),
-        )
+                elif action == "decline":
+                    # Update callback message
+                    await query.message.edit_text(
+                        text=f"❌ The request to lock '{word_to_lock}' has been declined."
+                    )
 
-    # Back to the help menu
-    elif query.data == "BACK_HELP":
-        await query.message.edit(
-            text=HELP_READ,
-            reply_markup=InlineKeyboardMarkup(HELP_BTN),
-        )
+                    # Notify the user
+                    await client.send_message(
+                        chat_id=user_id,
+                        text=f"Your request to lock the word '{word_to_lock}' has been **declined** by the bot owner."
+                    )
 
-    # Chatbot commands
-    elif query.data == "CHATBOT_CMD":
-        await query.message.edit(
-            text=CHATBOT_READ,
-            reply_markup=InlineKeyboardMarkup(CHATBOT_BACK),
-        )
+                # Acknowledge the callback query
+                await query.answer()
+            else:
+                # Unauthorized user clicks the button
+                await query.answer("You are not authorized to perform this action.", show_alert=True)
 
-    # Back to the chatbot menu
-    elif query.data == "CHATBOT_BACK":
-        await query.message.edit(
-            text=HELP_READ,
-            reply_markup=InlineKeyboardMarkup(HELP_BTN),
-        )
+        # Handle CLOSE callback
+        elif query.data == "CLOSE":
+            await query.message.delete()
+            await query.answer("Closed menu!", show_alert=True)
+
+        # Go back to the main menu
+        elif query.data == "BACK":
+            await query.message.edit_text(
+                text=START_TEXT,
+                reply_markup=InlineKeyboardMarkup(DEV_OP),
+            )
+
+        # Admin information
+        elif query.data == "ADMINS":
+            await query.message.edit_text(
+                text=ADMIN_READ,
+                reply_markup=InlineKeyboardMarkup(MUSIC_BACK_BTN),
+            )
+
+        # Tools information
+        elif query.data == "TOOLS_DATA":
+            await query.message.edit_text(
+                text=TOOLS_DATA_READ,
+                reply_markup=InlineKeyboardMarkup(CHATBOT_BACK),
+            )
+
+        # Back to the help menu
+        elif query.data == "BACK_HELP":
+            await query.message.edit_text(
+                text=HELP_READ,
+                reply_markup=InlineKeyboardMarkup(HELP_BTN),
+            )
+
+        # Chatbot commands
+        elif query.data == "CHATBOT_CMD":
+            await query.message.edit_text(
+                text=CHATBOT_READ,
+                reply_markup=InlineKeyboardMarkup(CHATBOT_BACK),
+            )
+
+        # Back to chatbot menu
+        elif query.data == "CHATBOT_BACK":
+            await query.message.edit_text(
+                text=HELP_READ,
+                reply_markup=InlineKeyboardMarkup(HELP_BTN),
+            )
+
+        # Back to home menu
+        elif query.data == "HOME_BACK":
+            await query.message.edit_text(
+                text=START_TEXT,
+                reply_markup=InlineKeyboardMarkup(START_BOT),
+            )
+    except Exception as e:
+        LOGGER.error(f"Error handling callback: {e}")
+        await query.answer("An error occurred while processing the request.", show_alert=True)
