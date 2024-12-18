@@ -300,9 +300,9 @@ async def chatbot_off(client, message: Message):
             {"$set": {"status": "disabled", "chat_id": chat_id}},
             upsert=True
         )
-        await message.reply_text("Chatbot Disabled in Private Chat!")
+        await message.reply_text("Cʜᴀᴛʙᴏᴛ ᴍᴏᴅᴇ ᴅɪsᴀʙʟᴇ!")
     else:
-        await message.reply_text("Chatbot Disabled in Group!")
+        await message.reply_text("Cʜᴀᴛʙᴏᴛ ᴍᴏᴅᴇ ᴅɪsᴀʙʟᴇ!")
 
 # Command to enable the chatbot (works in both private and group chats)
 @Client.on_message(filters.command(["chatbot on"], prefixes=["/"]))
@@ -324,9 +324,9 @@ async def chatbot_on(client, message: Message):
             {"$set": {"status": "enabled", "chat_id": chat_id}},
             upsert=True
         )
-        await message.reply_text("Chatbot Enabled in Private Chat!")
+        await message.reply_text("Cʜᴀᴛʙᴏᴛ ᴍᴏᴅᴇ ᴇɴᴀʙʟᴇ!")
     else:
-        await message.reply_text("Chatbot Enabled in Group!")
+        await message.reply_text("Cʜᴀᴛʙᴏᴛ ᴍᴏᴅᴇ ᴇɴᴀʙʟᴇ!")
 
 # Command to display chatbot status (on/off) in private and group chats
 @Client.on_message(filters.command(["chatbot"], prefixes=["/"]))
@@ -343,10 +343,10 @@ async def chatbot_usage(client, message: Message):
     # Handle the message depending on whether it's in a private chat or a group chat
     if message.chat.type == "private":
         # Private chat
-        await message.reply_text(f"**Usage:**\n`/chatbot [on/off]`\n{status_message}\nChatbot commands work here!")
+        await message.reply_text(f"**Sᴛᴀᴛᴜs ➟** {status_message}\n\n**𝐂ᴏᴍᴍᴀɴᴅ ᴏɴ ⇮ ᴏғғ**!\n-`/chatbot on` - ᴛᴏ ᴇɴᴀʙʟᴇ\n`/chatbot off` - ᴛᴏ ᴅɪsᴀʙʟᴇ.")
     else:
         # Group chat
-        await message.reply_text(f"**Usage:**\n`/chatbot [on/off]`\n{status_message}\nChatbot commands only work in groups.")
+        await message.reply_text(f"**Sᴛᴀᴛᴜs ➟** {status_message}\n\n**𝐂ᴏᴍᴍᴀɴᴅ ᴏɴ ⇮ ᴏғғ**!\n-`/chatbot on` - ᴛᴏ ᴇɴᴀʙʟᴇ\n`/chatbot off` - ᴛᴏ ᴅɪsᴀʙʟᴇ.")
 
 
 # Regular expression to filter unwanted messages containing special characters like /, !, ?, ~, \
@@ -362,10 +362,10 @@ async def lock_word_request(client, message: Message):
 
     # If the word is missing (after the command), handle the case
     if len(parts) == 1:
-        await message.reply_text("this futures main bot")
+        await message.reply_text("Tʜɪs ғᴜᴛᴜʀᴇs ᴏɴʟʏ ᴡᴏʀᴋ ɪɴ [ᴍᴀɪɴ ʙᴏᴛ](https://t.me/RADHIKA_CHAT_RROBOT")
     else:
         word_to_lock = parts[1]
-        await message.reply_text(f"go @RADHIKA_CHAT_RROBOT and send /lock {word_to_lock}")
+        await message.reply_text(f"Gᴏ ᴛᴏ [ᴍᴀɪɴ ʙᴏᴛ](https://t.me/RADHIKA_CHAT_RROBOT ᴀɴᴅ sᴇɴᴅ `/lock {word_to_lock}`")
 
 
 @Client.on_message(filters.command("clone", prefixes=["/"]))
@@ -378,7 +378,7 @@ async def lock_word_request(client, message: Message):
         await message.reply_text("Tʜɪs ғᴜᴛᴜʀᴇs ᴏɴʟʏ ᴡᴏʀᴋ ɪɴ [ᴍᴀɪɴ ʙᴏᴛ](https://t.me/RADHIKA_CHAT_RROBOT)")
     else:
         word_to_lock = parts[1]
-        await message.reply_text(f"go @RADHIKA_CHAT_RROBOT and send /lock {word_to_lock}")
+        await message.reply_text(f"Gᴏ ᴛᴏ [ᴍᴀɪɴ ʙᴏᴛ](https://t.me/RADHIKA_CHAT_RROBOT ᴀɴᴅ sᴇɴᴅ `/clone {word_to_lock}` ᴛᴏ ᴄʟᴏɴᴇ ʏᴏᴜʀ ʙᴏᴛ")
 
 # Callback handler for Accept/Decline actions
 
