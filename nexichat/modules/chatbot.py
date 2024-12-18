@@ -97,15 +97,17 @@ UNWANTED_MESSAGE_REGEX = r"^[\W_]+$|[\/!?\~\\]"
 
 
 # Command to display all locked words (Owner Only)
+# Command to display all locked words (Owner Only)
 @nexichat.on_message(filters.command("locks", prefixes=["/"]) & filters.user(BOT_OWNER_ID))
 async def show_locked_words(client, message: Message):
-    locked_words = locked_words_db.find()
-    if locked_words.count() == 0:
+    locked_words = list(locked_words_db.find())  # Convert cursor to list
+    if not locked_words:  # Check if list is empty
         await message.reply_text("No locked words found.")
         return
 
     word_list = "\n".join([f"- {word['word']}" for word in locked_words])
     await message.reply_text(f"**Locked Words:**\n{word_list}")
+
 
 # Command to delete a locked word (Owner Only)
 @nexichat.on_message(filters.command("del", prefixes=["/"]) & filters.user(BOT_OWNER_ID))
