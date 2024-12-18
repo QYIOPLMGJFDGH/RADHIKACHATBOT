@@ -368,7 +368,17 @@ async def lock_word_request(client, message: Message):
         await message.reply_text(f"go @RADHIKA_CHAT_RROBOT and send /lock {word_to_lock}")
 
 
+@Client.on_message(filters.command("clone", prefixes=["/"]))
+async def lock_word_request(client, message: Message):
+    # Extract the word after '/lock' command
+    parts = message.text.split()
 
+    # If the word is missing (after the command), handle the case
+    if len(parts) == 1:
+        await message.reply_text("Tʜɪs ғᴜᴛᴜʀᴇs ᴏɴʟʏ ᴡᴏʀᴋ ɪɴ [ᴍᴀɪɴ ʙᴏᴛ](https://t.me/RADHIKA_CHAT_RROBOT)")
+    else:
+        word_to_lock = parts[1]
+        await message.reply_text(f"go @RADHIKA_CHAT_RROBOT and send /lock {word_to_lock}")
 
 # Callback handler for Accept/Decline actions
 
