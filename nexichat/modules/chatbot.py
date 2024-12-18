@@ -1,6 +1,7 @@
 import os
 import re
 import random
+import config
 from pyrogram.enums import ParseMode
 from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid, ReactionInvalid
 from random import choice
@@ -12,9 +13,8 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from pyrogram.enums import ChatAction
 from pymongo import MongoClient
 
-MONGO_DB_URI = "mongodb+srv://teamdaxx123:teamdaxx123@cluster0.ysbpgcp.mongodb.net/?retryWrites=true&w=majority"
 # MongoDB Initialization
-mongo_client = MongoClient(MONGO_DB_URI)
+mongo_client = MongoClient(MONGO_DB_URL)
 chatbot_db = mongo_client["VickDb"]["Vick"]  # Stores chatbot status (enabled/disabled)
 word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
