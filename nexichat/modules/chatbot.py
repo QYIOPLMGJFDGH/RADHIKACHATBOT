@@ -6,7 +6,8 @@ from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid
 from random import choice
 from pyrogram import Client, filters
 from nexichat import nexichat
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
+from pyrogram.types import CallbackQuery
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from pyrogram.enums import ChatAction
 from pymongo import MongoClient
 
