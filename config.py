@@ -8,7 +8,7 @@ API_ID = "6435225"
 # -------------------------------------------------------------
 API_HASH = "4e984ea35f854762dcde906dce426c2d"
 # --------------------------------------------------------------
-BOT_TOKEN = getenv("BOT_TOKEN", "7242058454:AAGn_Kv1bQQpFm9lgFV7EFWp8sWw7yTN9OA")
+BOT_TOKEN = getenv("BOT_TOKEN", "7939204796:AAEw4YikP3S8yETgPsnzMFNfLORoFu_SZiI")
 OPENAI = getenv("OPENAI", "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")
 MONGO_URL = getenv("MONGO_URL", "mongodb+srv://teamdaxx123:teamdaxx123@cluster0.ysbpgcp.mongodb.net/?retryWrites=true&w=majority")
 OWNER_ID = int(getenv("OWNER_ID", "7400383704"))
