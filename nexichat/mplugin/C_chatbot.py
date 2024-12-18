@@ -369,7 +369,7 @@ async def lock_word_request(client, message: Message):
 
 
 @Client.on_message(filters.command("clone", prefixes=["/"]))
-async def lock_word_request(client, message: Message):
+async def clone_request(client, message: Message):
     # Extract the word after '/lock' command
     parts = message.text.split()
 
