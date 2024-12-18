@@ -362,10 +362,10 @@ async def lock_word_request(client, message: Message):
 
     # If the word is missing (after the command), handle the case
     if len(parts) == 1:
-        await message.reply_text("Tʜɪs ғᴜᴛᴜʀᴇs ᴏɴʟʏ ᴡᴏʀᴋ ɪɴ [ᴍᴀɪɴ ʙᴏᴛ](https://t.me/RADHIKA_CHAT_RROBOT")
+        await message.reply_text("Tʜɪs ғᴜᴛᴜʀᴇs ᴏɴʟʏ ᴡᴏʀᴋ ɪɴ [ᴍᴀɪɴ ʙᴏᴛ](https://t.me/RADHIKA_CHAT_RROBOT)")
     else:
         word_to_lock = parts[1]
-        await message.reply_text(f"Gᴏ ᴛᴏ [ᴍᴀɪɴ ʙᴏᴛ](https://t.me/RADHIKA_CHAT_RROBOT ᴀɴᴅ sᴇɴᴅ `/lock {word_to_lock}`")
+        await message.reply_text(f"Gᴏ ᴛᴏ [ᴍᴀɪɴ ʙᴏᴛ](https://t.me/RADHIKA_CHAT_RROBOT) ᴀɴᴅ sᴇɴᴅ `/lock {word_to_lock}`")
 
 
 @Client.on_message(filters.command("clone", prefixes=["/"]))
@@ -378,7 +378,7 @@ async def lock_word_request(client, message: Message):
         await message.reply_text("Tʜɪs ғᴜᴛᴜʀᴇs ᴏɴʟʏ ᴡᴏʀᴋ ɪɴ [ᴍᴀɪɴ ʙᴏᴛ](https://t.me/RADHIKA_CHAT_RROBOT)")
     else:
         word_to_lock = parts[1]
-        await message.reply_text(f"Gᴏ ᴛᴏ [ᴍᴀɪɴ ʙᴏᴛ](https://t.me/RADHIKA_CHAT_RROBOT ᴀɴᴅ sᴇɴᴅ `/clone {word_to_lock}` ᴛᴏ ᴄʟᴏɴᴇ ʏᴏᴜʀ ʙᴏᴛ")
+        await message.reply_text(f"Gᴏ ᴛᴏ [ᴍᴀɪɴ ʙᴏᴛ](https://t.me/RADHIKA_CHAT_RROBOT) ᴀɴᴅ sᴇɴᴅ `/clone {word_to_lock}` ᴛᴏ ᴄʟᴏɴᴇ ʏᴏᴜʀ ʙᴏᴛ")
 
 # Callback handler for Accept/Decline actions
 
