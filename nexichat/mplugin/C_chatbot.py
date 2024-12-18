@@ -122,16 +122,16 @@ async def lock_word(client, message: Message):
 async def delete_locked_word(client, message: Message):
     if len(message.text.split()) < 2:
         # Ensure the message is formatted correctly
-        await message.reply_text("Please specify a word to delete. Example: `/del <word>`", parse_mode="Markdown")
+        await message.reply_text("Please specify a word to delete. Example: `/del <word>`", parse_mode="markdown")
         return
 
     word_to_delete = sanitize_input(message.text.split()[1])
     deleted_word = locked_words_db.find_one_and_delete({"word": word_to_delete})
 
     if deleted_word:
-        await message.reply_text(f"The word '{word_to_delete}' has been successfully deleted.", parse_mode="Markdown")
+        await message.reply_text(f"The word '{word_to_delete}' has been successfully deleted.", parse_mode="markdown")
     else:
-        await message.reply_text(f"The word '{word_to_delete}' was not found in the locked words list.", parse_mode="Markdown")
+        await message.reply_text(f"The word '{word_to_delete}' was not found in the locked words list.", parse_mode="markdown")
 
 
 # Command to request word lock (Owner Only)
