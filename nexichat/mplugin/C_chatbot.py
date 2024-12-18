@@ -98,15 +98,29 @@ UNWANTED_MESSAGE_REGEX = r"^[\W_]+$|[\/!?\~\\]"
 
 # Command to display all locked words (Owner Only)
 # Command to display all locked words (Owner Only)
-@Client.on_message(filters.command("locks", prefixes=["/"]) & filters.user(BOT_OWNER_ID))
-async def show_locked_words(client, message: Message):
-    locked_words = list(locked_words_db.find())  # Convert cursor to list
-    if not locked_words:  # Check if list is empty
-        await message.reply_text("No locked words found.")
+# Function to check if the user is the bot owner
+async def is_owner(client, user_id):
+    bot_id = (await client.get_me()).id
+    # Check if the user_id matches the bot owner ID stored in your config or database
+    return user_id == BOT_OWNER_ID  # Use the bot owner's ID here
+
+@Client.on_message(filters.command("lock", prefixes=["/"]))
+async def lock_word(client, message: Message):
+    if len(message.text.split()) < 2:
+        await message.reply_text("Please provide a word to lock. Example: /lock <word>")
         return
 
-    word_list = "\n".join([f"- {word['word']}" for word in locked_words])
-    await message.reply_text(f"**Locked Words:**\n{word_list}")
+    word_to_lock = message.text.split()[1]
+    user_id = message.from_user.id
+
+    # Check if the user is the owner
+    if await is_owner(client, user_id):
+        await message.reply_text(f"You are the owner. The word '{word_to_lock}' is now locked.")
+        locked_words_db.insert_one({"word": word_to_lock})
+    else:
+        # Notify user that only the owner can lock words
+        await message.reply_text("Only the owner can lock words.")
+
 
 
 # Command to delete a locked word (Owner Only)
