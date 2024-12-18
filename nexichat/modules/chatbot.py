@@ -18,6 +18,7 @@ mongo_client = MongoClient(MONGO_URL)
 chatbot_db = mongo_client["VickDb"]["Vick"]  # Stores chatbot status (enabled/disabled)
 word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
+locked_words_db = mongo_client["LockedWords"]["LockedWordsDb"]
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # User-specific status
 BOT_OWNER_ID = 7400383704
 
