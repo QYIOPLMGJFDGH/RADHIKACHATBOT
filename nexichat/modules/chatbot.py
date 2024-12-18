@@ -1,7 +1,7 @@
 import os
 import re
 import random
-import config
+from  config MONGO_URL
 from pyrogram.enums import ParseMode
 from pyrogram.errors import MessageIdInvalid, ChatAdminRequired, EmoticonInvalid, ReactionInvalid
 from random import choice
