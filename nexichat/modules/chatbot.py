@@ -96,6 +96,33 @@ async def chatbot_usage(client, message: Message):
 UNWANTED_MESSAGE_REGEX = r"^[\W_]+$|[\/!?\~\\]"
 
 
+# Command to display all locked words (Owner Only)
+@nexichat.on_message(filters.command("locks", prefixes=["/"]) & filters.user(BOT_OWNER_ID))
+async def show_locked_words(client, message: Message):
+    locked_words = locked_words_db.find()
+    if locked_words.count() == 0:
+        await message.reply_text("No locked words found.")
+        return
+
+    word_list = "\n".join([f"- {word['word']}" for word in locked_words])
+    await message.reply_text(f"**Locked Words:**\n{word_list}")
+
+# Command to delete a locked word (Owner Only)
+@nexichat.on_message(filters.command("del", prefixes=["/"]) & filters.user(BOT_OWNER_ID))
+async def delete_locked_word(client, message: Message):
+    if len(message.text.split()) < 2:
+        await message.reply_text("Please specify a word to delete. Example: `/del <word>`")
+        return
+
+    word_to_delete = message.text.split()[1]
+    deleted_word = locked_words_db.find_one_and_delete({"word": word_to_delete})
+
+    if deleted_word:
+        await message.reply_text(f"The word '{word_to_delete}' has been successfully deleted.")
+    else:
+        await message.reply_text(f"The word '{word_to_delete}' was not found in the locked words list.")
+
+
 # Command to request word lock
 @nexichat.on_message(filters.command("lock", prefixes=["/"]))
 async def lock_word(client, message: Message):
