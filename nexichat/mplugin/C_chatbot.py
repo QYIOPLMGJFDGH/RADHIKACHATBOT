@@ -122,7 +122,7 @@ async def stats(cli: Client, message: Message):
 
 
 @Client.on_message(filters.command(["start", "aistart"]))
-async def start(client: Client, m: Message):
+async def sotart(client: Client, m: Message):
     # Get number of users and chats
     users = len(await get_served_users())
     chats = len(await get_served_chats())
@@ -480,7 +480,7 @@ broadcast_lock = asyncio.Lock()
 
 
 @Client.on_message(filters.command(["broadcast", "gcast"]))
-async def broadcast_message(client, message):
+async def cbroadcast_message(client, message):
     global IS_BROADCASTING
     bot_id = (await client.get_me()).id
     user_id = message.from_user.id
