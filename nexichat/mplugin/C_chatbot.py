@@ -104,7 +104,7 @@ async def lock_word_request(client, message: Message):
 
     # If the word is missing (after the command), handle the case
     if len(parts) == 1:
-        await message.reply_text("Please go @RADHIKA_CHAT_RROBOT and send /lock {word}")
+        await message.reply_text("this futures main bot")
     else:
         word_to_lock = parts[1]
         await message.reply_text(f"go @RADHIKA_CHAT_RROBOT and send /lock {word_to_lock}")
