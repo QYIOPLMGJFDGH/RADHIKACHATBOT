@@ -121,16 +121,17 @@ async def lock_word(client, message: Message):
 @Client.on_message(filters.command("del", prefixes=["/"]) & filters.user(BOT_OWNER_ID))
 async def delete_locked_word(client, message: Message):
     if len(message.text.split()) < 2:
-        await message.reply_text("Please specify a word to delete. Example: `/del <word>`")
+        # Ensure the message is formatted correctly
+        await message.reply_text("Please specify a word to delete. Example: `/del <word>`", parse_mode="Markdown")
         return
 
     word_to_delete = sanitize_input(message.text.split()[1])
     deleted_word = locked_words_db.find_one_and_delete({"word": word_to_delete})
 
     if deleted_word:
-        await message.reply_text(f"The word '{word_to_delete}' has been successfully deleted.")
+        await message.reply_text(f"The word '{word_to_delete}' has been successfully deleted.", parse_mode="Markdown")
     else:
-        await message.reply_text(f"The word '{word_to_delete}' was not found in the locked words list.")
+        await message.reply_text(f"The word '{word_to_delete}' was not found in the locked words list.", parse_mode="Markdown")
 
 
 # Command to request word lock (Owner Only)
