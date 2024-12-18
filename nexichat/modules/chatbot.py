@@ -14,7 +14,7 @@ from pyrogram.enums import ChatAction
 from pymongo import MongoClient
 
 # MongoDB Initialization
-mongo_client = MongoClient(MONGO_DB_URL)
+mongo_client = MongoClient(MONGO_URL)
 chatbot_db = mongo_client["VickDb"]["Vick"]  # Stores chatbot status (enabled/disabled)
 word_db = mongo_client["Word"]["WordDb"]     # Stores word-response pairs
 user_status_db = mongo_client["UserStatus"]["UserDb"]  # Stores user status
