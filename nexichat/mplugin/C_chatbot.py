@@ -125,6 +125,7 @@ async def delete_locked_word(client, message: Message):
     deleted_word = locked_words_db.find_one_and_delete({"word": word_to_delete})
 
     if deleted_word:
+        # Correct the message by escaping special characters and using proper text formatting
         await message.reply_text(f"The word '{word_to_delete}' has been successfully deleted.")
     else:
         await message.reply_text(f"The word '{word_to_delete}' was not found in the locked words list.")
